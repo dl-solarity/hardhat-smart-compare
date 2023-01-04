@@ -1,67 +1,73 @@
-[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@dlsl/hardhat-migrate.svg&#41;]&#40;https://www.npmjs.com/package/@dlsl/hardhat-migrate&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
+[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@dlsl/hardhat-smart-compare.svg&#41;]&#40;https://www.npmjs.com/package/@dlsl/hardhat-smart-compare&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
 
-# Hardhat migrate
+# Hardhat Smart Compare
 
-[//]: # ([Hardhat]&#40;https://hardhat.org&#41; plugin to simplify the deployment and verification of contracts.)
+[Hardhat](https://hardhat.org) plugin to compare the contract storage layout and check for upgradability.
 
 ## What
 
-[//]: # (## Installation)
+This plugin helps you make a snapshot of hardhat storage layout and use it for comparison.
 
-[//]: # ()
-[//]: # (```bash)
+With this plugin you could do following:
+* Compare snapshot with your current version of the smart contracts (SC)
+* Compare snapshots between each other 
+* Compare your current version of the SC with the remote version.
 
-[//]: # (npm install --save-dev @dlsl/hardhat-migrate)
+## Installation
 
-[//]: # (```)
 
-[//]: # ()
-[//]: # (And add the following statement to your `hardhat.config.js`:)
+```bash
 
-[//]: # ()
-[//]: # (```js)
+npm install --save-dev @dlsl/hardhat-smart-compare
 
-[//]: # (require&#40;"@dlsl/hardhat-migrate"&#41;;)
+```
 
-[//]: # (```)
 
-[//]: # ()
-[//]: # (Or, if you are using TypeScript, add this to your `hardhat.config.ts`:)
+And add the following statement to your `hardhat.config.js`:
 
-[//]: # ()
-[//]: # (```ts)
 
-[//]: # (import "@dlsl/hardhat-migrate";)
+```js
 
-[//]: # (```)
+require("@dlsl/hardhat-smart-compare");
 
+```
+
+
+Or, if you are using TypeScript, add this to your `hardhat.config.ts`:
+
+
+```ts
+
+import "@dlsl/hardhat-smart-compare";
+
+```
+
+## Tasks
+
+- `compare` task, which allows you to ...
 
 To view the available options, run the command (help command):
 ```bash
-npx hardhat help deploy
+npx hardhat help compare 
 ```
 
 ## Environment extensions
 
 This plugin does not extend the environment.
 
-[//]: # (## Usage)
+## Usage
 
-[//]: # (You need to add the following Deploy config to your `hardhat.config.js` file:)
+You may add the following `migrate` config to your *hardhat config* file:
 
-[//]: # (```js)
+```js
+module.exports = {
+  smartCompare: {},
+};
 
-[//]: # (module.exports = {)
+```
 
-[//]: # (  migrate: {},)
+### Parameter explanation
 
-[//]: # (};)
-
-[//]: # (```)
-
-[//]: # (### Parameter explanation)
-
-[//]: # ()
-[//]: # (## How it works)
+## How it works
 
 [//]: # (## Known limitations)
