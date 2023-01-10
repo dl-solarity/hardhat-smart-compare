@@ -1,24 +1,33 @@
-import { TASK_COMPARE } from "./constants";
+import { TASK_STORAGE_SAVE } from "./constants";
 
-require("@nomiclabs/hardhat-etherscan");
-
-import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
-
-import { extendConfig, task } from "hardhat/config";
+import { extendConfig, task, types } from "hardhat/config";
 import { ActionType } from "hardhat/types";
 
-import { deployConfigExtender } from "./config";
+import { compareConfigExtender, mergeCompareArgs } from "./config";
+import { StorageLayout } from "./storage/storage-layout";
+import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
+import { CompareArgs } from "./types";
 
-interface DeploymentArgs {}
+extendConfig(compareConfigExtender);
 
-extendConfig(deployConfigExtender);
+const storage_save: ActionType<CompareArgs> = async (taskArgs, env) => {
+  mergeCompareArgs(env, taskArgs);
 
-const compare: ActionType<DeploymentArgs> = async ({}, env) => {
   // Make sure that contract artifacts are up-to-date.
   await env.run(TASK_COMPILE, {
     quiet: true,
     force: true,
   });
+
+  const storageLayout = new StorageLayout(env);
+  await storageLayout.saveSnapshot();
 };
 
-task(TASK_COMPARE, "Deploy contracts").setAction(compare);
+task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
+  .addOptionalParam(
+    "snapshotPath",
+    "Path to the directory where you want to save the storage layout snapshot.",
+    undefined,
+    types.string
+  )
+  .setAction(storage_save);
