@@ -19,11 +19,13 @@ export interface TypeEntry {
   value?: string;
 }
 
+export interface TypeEntries {
+  [type_name: string]: TypeEntry;
+}
+
 export interface StorageLayoutEntry {
   storage: StorageEntry[];
-  types: {
-    [type_name: string]: TypeEntry;
-  };
+  types: TypeEntries;
 }
 
 export interface ContractStorageLayout {
@@ -34,4 +36,10 @@ export interface ContractStorageLayout {
 export interface ContractFileStorageLayout {
   source: string;
   contracts: ContractStorageLayout[];
+}
+
+export interface CompareResult {
+  errors: string[];
+  warnings: string[];
+  isDiff: boolean;
 }

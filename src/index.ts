@@ -1,4 +1,4 @@
-import { TASK_STORAGE_SAVE } from "./constants";
+import { TASK_STORAGE_SAVE, TASK_STORAGE_COMPARE } from "./constants";
 
 import { extendConfig, task, types } from "hardhat/config";
 import { ActionType } from "hardhat/types";
@@ -23,6 +23,19 @@ const storage_save: ActionType<CompareArgs> = async (taskArgs, env) => {
   await storageLayout.saveSnapshot();
 };
 
+const storage_compare: ActionType<CompareArgs> = async (taskArgs, env) => {
+  mergeCompareArgs(env, taskArgs);
+
+  // Make sure that contract artifacts are up-to-date.
+  await env.run(TASK_COMPILE, {
+    quiet: true,
+    force: true,
+  });
+
+  const storageLayout = new StorageLayout(env);
+  await storageLayout.compareSnapshots();
+};
+
 task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
   .addOptionalParam(
     "snapshotPath",
@@ -31,3 +44,14 @@ task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
     types.string
   )
   .setAction(storage_save);
+
+// TODO: make proper documentation
+
+task(TASK_STORAGE_COMPARE, "Compare current storage layout with given.")
+  .addOptionalParam(
+    "snapshotPath",
+    "Path to the directory where you want to save the storage layout snapshot.",
+    undefined,
+    types.string
+  )
+  .setAction(storage_compare);

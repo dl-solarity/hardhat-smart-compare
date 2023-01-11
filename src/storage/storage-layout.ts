@@ -2,9 +2,33 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import fs from "fs-extra";
 import { ParseBuildInfo } from "./parsers";
+import { NomicLabsHardhatPluginError } from "hardhat/plugins";
+import { pluginName } from "../constants";
+import { ContractFileStorageLayout } from "./types";
+import { CompareSnapshots } from "./compare-storage-layout-utils";
+import isEqual from "lodash.isequal";
 
 export class StorageLayout {
   constructor(private hre_: HardhatRuntimeEnvironment) {}
+
+  async compareSnapshots(fileName: string = "storage_snapshot.json") {
+    const savedFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
+
+    if (!fs.existsSync(savedFilePath)) {
+      throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved the storage layout!");
+    }
+
+    const newSnapshot = await this.makeSnapshot();
+    const oldSnapshot: ContractFileStorageLayout[][] = require(savedFilePath);
+
+    if (isEqual(oldSnapshot, newSnapshot)) {
+      console.log("Current snapshot is equal with current version of contracts!");
+      return;
+    }
+
+    const result = CompareSnapshots(oldSnapshot, newSnapshot);
+    console.log(JSON.stringify(result, null, 2));
+  }
 
   async saveSnapshot() {
     if (!fs.existsSync(this.hre_.config.compare.snapshotPath)) {
@@ -18,7 +42,7 @@ export class StorageLayout {
     await fs.writeJSON(saveFilePath, await this.makeSnapshot(), { spaces: 2 });
   }
 
-  private async makeSnapshot() {
+  private async makeSnapshot(): Promise<ContractFileStorageLayout[][]> {
     const inspectedBuildInfos: string[] = [];
     const artifacts = [];
     const paths = await this.hre_.artifacts.getAllFullyQualifiedNames();

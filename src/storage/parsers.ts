@@ -5,10 +5,7 @@ import { ContractFileStorageLayout, StorageLayoutEntry } from "./types";
 
 export function ParseBuildInfo(contract: BuildInfo | undefined): ContractFileStorageLayout[] {
   if (contract === undefined) {
-    throw new NomicLabsHardhatPluginError(
-      pluginName,
-      "Could not match the contract with the related build info file!"
-    );
+    throw new NomicLabsHardhatPluginError(pluginName, "Could not match the contract with the related build info file!");
   }
   return ParseContracts(contract.output.contracts);
 }
