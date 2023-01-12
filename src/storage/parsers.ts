@@ -1,43 +1,46 @@
 import { BuildInfo, CompilerOutputContract } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import { pluginName } from "../constants";
-import { ContractFileStorageLayout, StorageLayoutEntry } from "./types";
+import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "./types";
 
-export function ParseBuildInfo(contract: BuildInfo | undefined): ContractFileStorageLayout[] {
+export function ParseBuildInfo(contract: BuildInfo | undefined): BuildInfoData {
   if (contract === undefined) {
     throw new NomicLabsHardhatPluginError(pluginName, "Could not match the contract with the related build info file!");
   }
-  return ParseContracts(contract.output.contracts);
+
+  return {
+    contracts: parseContracts(contract.output.contracts).sort((a, b) =>
+      (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)
+    ),
+    solcLongVersion: contract.solcLongVersion,
+    solcVersion: contract.solcVersion,
+  };
 }
 
-function ParseContracts(contracts: {
-  [p: string]: { [p: string]: CompilerOutputContract };
-}): ContractFileStorageLayout[] {
+function parseContracts(contracts: { [p: string]: { [p: string]: CompilerOutputContract } }): ContractStorageLayout[] {
   const resultArr = [];
+
   for (const [sourceName, contractData] of Object.entries(contracts)) {
-    resultArr.push(ParseContractFile(sourceName, contractData));
+    resultArr.push(...parseContractFile(sourceName, contractData));
   }
+
   return resultArr;
 }
 
-function ParseContractFile(
-  source: string,
-  contract: { [p: string]: CompilerOutputContract }
-): ContractFileStorageLayout {
+function parseContractFile(source: string, contract: { [p: string]: CompilerOutputContract }): ContractStorageLayout[] {
   const resultArr = [];
+
   for (const [contractName, contractStorage] of Object.entries(contract)) {
-    let contractStorageLayout = {
+    let contractStorageLayout: ContractStorageLayout = {
       name: contractName,
+      source: source,
       entries: extractStorageLayout(contractStorage),
     };
 
     resultArr.push(contractStorageLayout);
   }
 
-  return {
-    source: source,
-    contracts: resultArr,
-  };
+  return resultArr;
 }
 
 // We need to use `any` type because, `storageLayout` field in evm Object is optional and

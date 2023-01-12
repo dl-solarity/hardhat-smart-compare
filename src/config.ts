@@ -1,4 +1,4 @@
-import { ConfigExtender, HardhatRuntimeEnvironment, SolcConfig, SolcUserConfig } from "hardhat/types";
+import { ConfigExtender, HardhatRuntimeEnvironment } from "hardhat/types";
 import { CompareArgs } from "./types";
 
 export const compareConfigExtender: ConfigExtender = (resolvedConfig, config) => {
@@ -16,7 +16,7 @@ export const compareConfigExtender: ConfigExtender = (resolvedConfig, config) =>
   }
 
   for (let compiler of resolvedConfig.solidity.compilers) {
-    compiler.settings.outputSelection['*']['*'].push('storageLayout');
+    compiler.settings.outputSelection["*"]["*"].push("storageLayout");
   }
 };
 

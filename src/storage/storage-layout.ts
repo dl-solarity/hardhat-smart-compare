@@ -4,8 +4,8 @@ import fs from "fs-extra";
 import { ParseBuildInfo } from "./parsers";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import { pluginName } from "../constants";
-import { ContractFileStorageLayout } from "./types";
-import { CompareSnapshots } from "./compare-storage-layout-utils";
+import { BuildInfoData } from "./types";
+import { StorageCompare } from "./compare-storage-layout-utils";
 import isEqual from "lodash.isequal";
 import * as path from "path";
 
@@ -20,15 +20,15 @@ export class StorageLayout {
     }
 
     const newSnapshot = await this.makeSnapshot();
-    const oldSnapshot: ContractFileStorageLayout[][] = require(savedFilePath);
+    const oldSnapshot: BuildInfoData[] = require(savedFilePath);
 
     if (isEqual(oldSnapshot, newSnapshot)) {
       console.log("Current snapshot is equal with current version of contracts!");
       return;
     }
 
-    const result = CompareSnapshots(oldSnapshot, newSnapshot);
-    console.log(JSON.stringify(result, null, 2));
+    const storageCompare = new StorageCompare();
+    storageCompare.CompareStorage(oldSnapshot, newSnapshot);
   }
 
   async saveSnapshot() {
@@ -43,7 +43,7 @@ export class StorageLayout {
     await fs.writeJSON(saveFilePath, await this.makeSnapshot(), { spaces: 2 });
   }
 
-  private async makeSnapshot(): Promise<ContractFileStorageLayout[][]> {
+  private async makeSnapshot(): Promise<BuildInfoData[]> {
     const inspectedBuildInfos: string[] = [];
     const artifacts = [];
     const paths = await this.hre_.artifacts.getAllFullyQualifiedNames();

@@ -30,16 +30,16 @@ export interface StorageLayoutEntry {
 
 export interface ContractStorageLayout {
   name: string;
+  source: string;
   entries: StorageLayoutEntry;
 }
 
-export interface ContractFileStorageLayout {
-  source: string;
+export interface BuildInfoData {
+  solcVersion: string;
+  solcLongVersion: string;
   contracts: ContractStorageLayout[];
 }
 
-export interface CompareResult {
-  errors: string[];
-  warnings: string[];
-  isDiff: boolean;
+export interface CompareInfo {
+  [contract: string]: string[];
 }
