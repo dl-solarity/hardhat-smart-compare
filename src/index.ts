@@ -10,7 +10,7 @@ import { CompareArgs } from "./types";
 
 extendConfig(compareConfigExtender);
 
-const storage_save: ActionType<CompareArgs> = async (taskArgs, env) => {
+const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
   mergeCompareArgs(env, taskArgs);
 
   // Make sure that contract artifacts are up-to-date.
@@ -23,7 +23,7 @@ const storage_save: ActionType<CompareArgs> = async (taskArgs, env) => {
   await storageLayout.saveSnapshot();
 };
 
-const storage_compare: ActionType<CompareArgs> = async (taskArgs, env) => {
+const storageCompare: ActionType<CompareArgs> = async (taskArgs, env) => {
   mergeCompareArgs(env, taskArgs);
 
   // Make sure that contract artifacts are up-to-date.
@@ -43,7 +43,7 @@ task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
     undefined,
     types.string
   )
-  .setAction(storage_save);
+  .setAction(storageSave);
 
 // TODO: make proper documentation
 
@@ -54,4 +54,4 @@ task(TASK_STORAGE_COMPARE, "Compare current storage layout with given.")
     undefined,
     types.string
   )
-  .setAction(storage_compare);
+  .setAction(storageCompare);

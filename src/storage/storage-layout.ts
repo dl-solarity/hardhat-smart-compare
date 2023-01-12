@@ -7,6 +7,7 @@ import { pluginName } from "../constants";
 import { ContractFileStorageLayout } from "./types";
 import { CompareSnapshots } from "./compare-storage-layout-utils";
 import isEqual from "lodash.isequal";
+import * as path from "path";
 
 export class StorageLayout {
   constructor(private hre_: HardhatRuntimeEnvironment) {}
@@ -65,12 +66,6 @@ export class StorageLayout {
   }
 
   private resolvePathToFile(path_: string, file_: string = ""): string {
-    let pathToFile = fs.realpathSync(path_);
-
-    if (pathToFile.substring(pathToFile.length - 1, pathToFile.length) === "/") {
-      return pathToFile + file_;
-    }
-
-    return pathToFile + "/" + file_;
+    return path.normalize(fs.realpathSync(path_) + "/" + file_);
   }
 }
