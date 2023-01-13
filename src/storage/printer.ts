@@ -1,4 +1,5 @@
 import { CompareInfo } from "./types";
+import chalk from "chalk";
 
 export class Printer {
   constructor(private info: CompareInfo) {}
@@ -12,7 +13,7 @@ export class Printer {
 
     for (let [key, value] of Object.entries(this.info)) {
       if (value.size > 0) {
-        console.log(`Contract: ${key}`);
+        console.log(chalk.bgCyan(`Contract: ${key}\n`));
         for (const entry of value) {
           console.log(entry);
         }

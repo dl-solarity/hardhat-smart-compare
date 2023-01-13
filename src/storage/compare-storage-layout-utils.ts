@@ -12,7 +12,6 @@ import {
 import { removeStorageEntry, isInContracts, mergeBuildInfos } from "./utils";
 
 import chalk from "chalk";
-import isEqual from "lodash.isequal";
 
 export class StorageCompare {
   private result: CompareInfo = {};
@@ -92,7 +91,7 @@ export class StorageCompare {
           continue;
         }
 
-        message += `\tRenamed contract from ${oldContractName} to ${latestContractName}\n`;
+        message += chalk.blue(`\tRenamed contract from ${oldContractName} to ${latestContractName}\n`);
 
         isMatched = true;
         oldEntry.name = "1_Matched!";
@@ -108,16 +107,20 @@ export class StorageCompare {
 
     for (const contract of this.oldPool) {
       if (contract.name !== "1_Matched!") {
-        message += `\tCould not find a contract ${contract.source}:${contract.name} in the latest version of contracts!\n`;
+        message += chalk.redBright(
+          `\tCould not find a contract ${contract.source}:${contract.name} in the latest version of contracts!\n`
+        );
       }
     }
 
     for (const contract of this.latestPool) {
-      message += `\tCould not find a contract ${contract.source}:${contract.name} in the old version of contracts!\n`;
+      message += chalk.redBright(
+        `\tCould not find a contract ${contract.source}:${contract.name} in the old version of contracts!\n`
+      );
     }
 
-    if (startMsgLength < message.length) {
-      this.result[infoField].add(chalk.red(message));
+    if (startMsgLength !== message.length) {
+      this.result[infoField].add(message);
     }
   }
 
@@ -193,16 +196,8 @@ export class StorageCompare {
     contractName: string,
     slot: string
   ) {
-    if (oldType === latestType) {
-      return;
-    }
-
     const oldTypeEntry = oldTypes[oldType];
     const latestTypeEntry = latestTypes[latestType];
-
-    if (isEqual(oldTypeEntry, latestTypeEntry)) {
-      return;
-    }
 
     if (this.result[contractName] === undefined) {
       this.result[contractName] = new Set<string>();
@@ -212,15 +207,19 @@ export class StorageCompare {
     const startMsgLength = message.length;
 
     if (oldTypeEntry.encoding !== latestTypeEntry.encoding) {
-      message += `\tEncoding changed! Old encoding: ${oldTypeEntry.encoding} -> Latest encoding: ${latestTypeEntry.encoding}\n`;
+      message += chalk.red(
+        `\tEncoding changed! Old encoding: ${oldTypeEntry.encoding} -> Latest encoding: ${latestTypeEntry.encoding}\n`
+      );
     }
 
     if (oldTypeEntry.numberOfBytes !== latestTypeEntry.numberOfBytes) {
-      message += `\tNumber of bytes changed! Old number of bytes: ${oldTypeEntry.numberOfBytes} -> Latest number of bytes: ${latestTypeEntry.numberOfBytes}\n`;
+      message += chalk.red(
+        `\tNumber of bytes changed! Old number of bytes: ${oldTypeEntry.numberOfBytes} -> Latest number of bytes: ${latestTypeEntry.numberOfBytes}\n`
+      );
     }
 
-    if (startMsgLength < message.length) {
-      this.result[contractName].add(chalk.red(message));
+    if (startMsgLength !== message.length) {
+      this.result[contractName].add(message);
     }
 
     if (oldTypeEntry.members !== undefined && latestTypeEntry.members !== undefined) {
@@ -286,19 +285,19 @@ export class StorageCompare {
     const startMsgLength = message.length;
 
     if (old.slot !== latest.slot) {
-      message += `\tSlot changed! Old slot: ${old.slot} -> Latest slot: ${latest.slot}\n`;
+      message += chalk.red(`\tSlot changed! Old slot: ${old.slot} -> Latest slot: ${latest.slot}\n`);
     }
 
     if (old.offset !== latest.offset) {
-      message += `\tOffset changed!! Old offset: ${old.offset} -> Latest offset: ${latest.offset}\n`;
+      message += chalk.red(`\tOffset changed!! Old offset: ${old.offset} -> Latest offset: ${latest.offset}\n`);
     }
 
     if (old.label !== latest.label) {
-      message += `\tLabels changed! Old label: ${old.label} -> Latest label: ${latest.label}\n`;
+      message += chalk.red(`\tLabels changed! Old label: ${old.label} -> Latest label: ${latest.label}\n`);
     }
 
-    if (startMsgLength < message.length) {
-      this.result[contractName].add(chalk.red(message));
+    if (startMsgLength !== message.length) {
+      this.result[contractName].add(message);
     }
 
     return 0;

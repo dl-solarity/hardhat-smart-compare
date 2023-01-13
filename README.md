@@ -10,31 +10,27 @@ This plugin helps you make a snapshot of hardhat storage layout and use it for c
 
 With this plugin you could do the following:
 * Compare snapshot with your current version of the smart contracts (SC)
-* Compare snapshots between each other 
-* Compare your current version of the SC with the remote version.
+
+[//]: # (* Compare snapshots between each other )
+
+[//]: # (* Compare your current version of the SC with the remote version.)
 
 ## Installation
 
 ```bash
-
 npm install --save-dev @dlsl/hardhat-smart-compare
-
 ```
 
 And add the following statement to your `hardhat.config.js`:
 
 ```js
-
 require("@dlsl/hardhat-smart-compare");
-
 ```
 
 Or, if you are using TypeScript, add this to your `hardhat.config.ts`:
 
 ```ts
-
 import "@dlsl/hardhat-smart-compare";
-
 ```
 
 ## Tasks
@@ -54,7 +50,7 @@ This plugin does not extend the environment.
 
 ## Usage
 
-You may add the following `migrate` config to your *hardhat config* file:
+You may add the following `compare` config to your *hardhat config* file:
 
 ```js
 module.exports = {
@@ -63,7 +59,6 @@ module.exports = {
     snapshotFileName: "storage_snapshot.json",
   },
 };
-
 ```
 
 ### Parameter explanation
