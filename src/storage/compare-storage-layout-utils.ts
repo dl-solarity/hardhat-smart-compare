@@ -1,3 +1,6 @@
+import { NomicLabsHardhatPluginError } from "hardhat/plugins";
+import { pluginName } from "../constants";
+
 import {
   BuildInfoData,
   CompareInfo,
@@ -6,11 +9,10 @@ import {
   StorageLayoutEntry,
   TypeEntries,
 } from "./types";
-import { RemoveStorageEntry, GetContractFullName } from "./utils";
+import { RemoveStorageEntry, IsInContracts, MergeBuildInfos } from "./utils";
+
 import chalk from "chalk";
 import isEqual from "lodash.isequal";
-import { NomicLabsHardhatPluginError } from "hardhat/plugins";
-import { pluginName } from "../constants";
 
 export class StorageCompare {
   private result: CompareInfo = {};
@@ -18,19 +20,20 @@ export class StorageCompare {
   private latestPool: ContractStorageLayout[] = [];
 
   CompareBuildInfos(oldSnapshot: BuildInfoData[], newSnapshot: BuildInfoData[]): CompareInfo {
-    const [oldContracts, latestContracts] = this.mergeBuildInfos(oldSnapshot, newSnapshot);
-    return this.CompareStorage(oldContracts, latestContracts);
+    const [oldContracts, latestContracts] = MergeBuildInfos(oldSnapshot, newSnapshot);
+
+    return this.CompareContractStorageLayouts(oldContracts, latestContracts);
   }
 
-  CompareStorage(old: ContractStorageLayout[], latest: ContractStorageLayout[]): CompareInfo {
+  CompareContractStorageLayouts(old: ContractStorageLayout[], latest: ContractStorageLayout[]): CompareInfo {
     const [normalizedOld, normalizedLatest] = this.normalizeContracts(old, latest);
+
     for (let i = 0; i < normalizedOld.length; i++) {
       this.compareStorageLayoutEntries(normalizedOld[i].entries, normalizedLatest[i].entries);
     }
 
     this.SolveConflicts();
 
-    console.log(JSON.stringify(this.result, null, 2));
     return this.result;
   }
 
@@ -49,6 +52,7 @@ export class StorageCompare {
         const msg = `Added new contract: ${contract.source}:${contract.name}`;
         this.result[infoField].push(chalk.yellowBright(msg));
       }
+
       return;
     }
 
@@ -57,12 +61,14 @@ export class StorageCompare {
         const msg = `Deleted contract: ${contract.source}:${contract.name}`;
         this.result[infoField].push(chalk.redBright(msg));
       }
+
       return;
     }
 
     for (const oldEntry of this.oldPool) {
       let isMatched = false;
       let nameToDelete = "";
+
       for (const latestEntry of this.latestPool) {
         const oldContractName = `${oldEntry.source}:${oldEntry.name}`;
         const latestContractName = `${latestEntry.source}:${latestEntry.name}`;
@@ -89,8 +95,10 @@ export class StorageCompare {
         isMatched = true;
         oldEntry.name = "1_Matched!";
         nameToDelete = latestContractName;
+
         break;
       }
+
       if (isMatched) {
         this.latestPool = RemoveStorageEntry(this.latestPool, nameToDelete);
       }
@@ -111,7 +119,7 @@ export class StorageCompare {
 
   private normalizeContracts(old: ContractStorageLayout[], latest: ContractStorageLayout[]) {
     const filteredArray = old.filter((old) => {
-      return this.isInContracts(latest, old);
+      return IsInContracts(latest, old);
     });
 
     let normalizedLatest: ContractStorageLayout[] = [];
@@ -119,7 +127,7 @@ export class StorageCompare {
 
     if (filteredArray.length != old.length) {
       for (const entry of old) {
-        if (!this.isInContracts(filteredArray, entry)) {
+        if (!IsInContracts(filteredArray, entry)) {
           this.oldPool.push(entry);
           continue;
         }
@@ -132,7 +140,7 @@ export class StorageCompare {
 
     if (filteredArray.length != latest.length) {
       for (const entry of latest) {
-        if (!this.isInContracts(filteredArray, entry)) {
+        if (!IsInContracts(filteredArray, entry)) {
           this.latestPool.push(entry);
           continue;
         }
@@ -146,16 +154,20 @@ export class StorageCompare {
     return [normalizedOld, normalizedLatest];
   }
 
-  private isInContracts = (latest: ContractStorageLayout[], old: ContractStorageLayout) =>
-    this.findContract(latest, old.name, old.source) !== -1;
-
   private compareStorageLayoutEntries(old: StorageLayoutEntry, latest: StorageLayoutEntry) {
     for (const index in old.storage) {
       if (this.compareStorageEntries(old.storage[index].contract, old.storage[index], latest.storage[index]) === -1) {
         continue;
       }
 
-      this.compareTypes(old, latest, Number(index));
+      this.compareTypeEntries(
+        old.storage[index].type,
+        latest.storage[index].type,
+        old.types,
+        latest.types,
+        latest.storage[index].contract,
+        old.storage[index].slot
+      );
     }
 
     if (old.storage.length < latest.storage.length) {
@@ -169,20 +181,6 @@ export class StorageCompare {
         this.result[contractName].push(chalk.yellow(msg));
       }
     }
-  }
-
-  private compareTypes(old: StorageLayoutEntry, latest: StorageLayoutEntry, index: number) {
-    const oldType = old.storage[index].type;
-    const latestType = latest.storage[index].type;
-
-    this.compareTypeEntries(
-      oldType,
-      latestType,
-      old.types,
-      latest.types,
-      latest.storage[index].contract,
-      old.storage[index].slot
-    );
   }
 
   private compareTypeEntries(
@@ -211,12 +209,14 @@ export class StorageCompare {
     if (oldTypeEntry.encoding !== latestTypeEntry.encoding) {
       const msg = `Encoding for latest label ${latestTypeEntry.label} (slot ${slot}) different! Old encoding: ${oldTypeEntry.encoding} -> Latest encoding: ${latestTypeEntry.encoding}`;
       this.result[contractName].push(chalk.red(msg));
+
       return;
     }
 
     if (oldTypeEntry.numberOfBytes !== latestTypeEntry.numberOfBytes) {
       const msg = `Number of bytes for latest label ${latestTypeEntry.label} (slot ${slot}) different! Old number of bytes: ${oldTypeEntry.numberOfBytes} -> Latest number of bytes: ${latestTypeEntry.numberOfBytes}`;
       this.result[contractName].push(chalk.red(msg));
+
       return;
     }
 
@@ -245,7 +245,6 @@ export class StorageCompare {
       if (oldTypeEntry.members.length < latestTypeEntry.members.length) {
         for (const index in latestTypeEntry.members.slice(oldTypeEntry.members.length)) {
           const contractName = latestTypeEntry.members[index].contract;
-
           if (this.result[contractName] === undefined) {
             this.result[contractName] = [];
           }
@@ -296,38 +295,5 @@ export class StorageCompare {
     }
 
     return 0;
-  }
-
-  private findContract(contracts: ContractStorageLayout[], name: string = "", source: string = ""): number {
-    if (source === "") {
-      return contracts.findIndex((element) => {
-        return this.isNameOnly(element, name);
-      });
-    }
-
-    return contracts.findIndex((element) => {
-      return this.isFullName(element, `${source}:${name}`);
-    });
-  }
-
-  private isNameOnly = (element: ContractStorageLayout, name: string) => element.name === name;
-  private isFullName = (element: ContractStorageLayout, fullName: string) => GetContractFullName(element) === fullName;
-
-  private mergeBuildInfos(
-    old: BuildInfoData[],
-    latest: BuildInfoData[]
-  ): [ContractStorageLayout[], ContractStorageLayout[]] {
-    const mergedOld: ContractStorageLayout[] = [];
-    const mergedLatest: ContractStorageLayout[] = [];
-
-    for (const entry of old) {
-      mergedOld.push(...entry.contracts);
-    }
-
-    for (const entry of latest) {
-      mergedLatest.push(...entry.contracts);
-    }
-
-    return [mergedOld, mergedLatest];
   }
 }

@@ -16,14 +16,14 @@ export class StorageLayout {
     const savedFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
 
     if (!fs.existsSync(savedFilePath)) {
-      throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved the storage layout!");
+      throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved  snapshot of the storage layout!");
     }
 
     const newSnapshot = await this.makeSnapshot();
     const oldSnapshot: BuildInfoData[] = require(savedFilePath);
 
     if (isEqual(oldSnapshot, newSnapshot)) {
-      console.log("Current snapshot is equal with current version of contracts!");
+      console.log("Current snapshot is equal to thr current version of contracts!");
       return;
     }
 
@@ -31,12 +31,11 @@ export class StorageLayout {
     storageCompare.CompareBuildInfos(oldSnapshot, newSnapshot);
   }
 
-  async saveSnapshot() {
+  async saveSnapshot(fileName: string = "storage_snapshot.json") {
     if (!fs.existsSync(this.hre_.config.compare.snapshotPath)) {
       fs.mkdirSync(this.hre_.config.compare.snapshotPath);
     }
 
-    const fileName = "storage_snapshot.json";
     const saveFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
 
     await fs.ensureFile(saveFilePath);

@@ -1,7 +1,7 @@
 {
   "name": "@dlsl/hardhat-smart-compare",
   "version": "1.0.0",
-  "description": "",
+  "description": "This package facilitate contract upgradability and provides various comparison tools.",
   "scripts": {
     "install": "npx husky install",
     "compile": "tsc --build .",
