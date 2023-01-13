@@ -127,7 +127,6 @@ export class StorageCompare {
         normalizedOld.push(entry);
       }
     } else {
-      console.log("Old skipped!");
       normalizedOld = old;
     }
 
@@ -141,7 +140,6 @@ export class StorageCompare {
         normalizedLatest.push(entry);
       }
     } else {
-      console.log("Latest skipped!");
       normalizedLatest = latest;
     }
 
