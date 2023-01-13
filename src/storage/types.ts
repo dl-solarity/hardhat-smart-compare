@@ -37,6 +37,7 @@ export interface ContractStorageLayout {
 export interface BuildInfoData {
   solcVersion: string;
   solcLongVersion: string;
+  format: string;
   contracts: ContractStorageLayout[];
 }
 

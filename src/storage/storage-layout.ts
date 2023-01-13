@@ -28,7 +28,7 @@ export class StorageLayout {
     }
 
     const storageCompare = new StorageCompare();
-    storageCompare.CompareStorage(oldSnapshot, newSnapshot);
+    storageCompare.CompareBuildInfos(oldSnapshot, newSnapshot);
   }
 
   async saveSnapshot() {

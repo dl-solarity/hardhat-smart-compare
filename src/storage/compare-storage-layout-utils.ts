@@ -6,21 +6,150 @@ import {
   StorageLayoutEntry,
   TypeEntries,
 } from "./types";
-import { GetContractFullName } from "./constants";
+import { RemoveStorageEntry, GetContractFullName } from "./utils";
 import chalk from "chalk";
 import isEqual from "lodash.isequal";
+import { NomicLabsHardhatPluginError } from "hardhat/plugins";
+import { pluginName } from "../constants";
 
 export class StorageCompare {
   private result: CompareInfo = {};
+  private oldPool: ContractStorageLayout[] = [];
+  private latestPool: ContractStorageLayout[] = [];
 
-  CompareStorage(old: BuildInfoData[], latest: BuildInfoData[]): CompareInfo {
-    for (let i = 0; i < old[0].contracts.length; i++) {
-      this.compareStorageLayoutEntries(old[0].contracts[i].entries, latest[0].contracts[i].entries);
+  CompareBuildInfos(oldSnapshot: BuildInfoData[], newSnapshot: BuildInfoData[]): CompareInfo {
+    const [oldContracts, latestContracts] = this.mergeBuildInfos(oldSnapshot, newSnapshot);
+    return this.CompareStorage(oldContracts, latestContracts);
+  }
+
+  CompareStorage(old: ContractStorageLayout[], latest: ContractStorageLayout[]): CompareInfo {
+    const [normalizedOld, normalizedLatest] = this.normalizeContracts(old, latest);
+    for (let i = 0; i < normalizedOld.length; i++) {
+      this.compareStorageLayoutEntries(normalizedOld[i].entries, normalizedLatest[i].entries);
     }
+
+    this.SolveConflicts();
 
     console.log(JSON.stringify(this.result, null, 2));
     return this.result;
   }
+
+  private SolveConflicts() {
+    if (this.oldPool.length === 0 && this.latestPool.length === 0) {
+      return;
+    }
+
+    const infoField = "Conflicts!";
+    if (this.result[infoField] === undefined) {
+      this.result[infoField] = [];
+    }
+
+    if (this.oldPool.length === 0) {
+      for (const contract of this.latestPool) {
+        const msg = `Added new contract: ${contract.source}:${contract.name}`;
+        this.result[infoField].push(chalk.yellowBright(msg));
+      }
+      return;
+    }
+
+    if (this.latestPool.length === 0) {
+      for (const contract of this.oldPool) {
+        const msg = `Deleted contract: ${contract.source}:${contract.name}`;
+        this.result[infoField].push(chalk.redBright(msg));
+      }
+      return;
+    }
+
+    for (const oldEntry of this.oldPool) {
+      let isMatched = false;
+      let nameToDelete = "";
+      for (const latestEntry of this.latestPool) {
+        const oldContractName = `${oldEntry.source}:${oldEntry.name}`;
+        const latestContractName = `${latestEntry.source}:${latestEntry.name}`;
+
+        if (this.result[oldContractName] === undefined) {
+          this.result[oldContractName] = [];
+        }
+
+        if (this.result[latestContractName] === undefined) {
+          this.result[latestContractName] = [];
+        }
+
+        this.compareStorageLayoutEntries(oldEntry.entries, latestEntry.entries);
+
+        if (this.result[oldContractName].length > 0 || this.result[latestContractName].length > 0) {
+          this.result[oldContractName] = [];
+          this.result[latestContractName] = [];
+          continue;
+        }
+
+        const msg = `Renamed contract from ${oldContractName} to ${latestContractName}`;
+        this.result[infoField].push(chalk.blue(msg));
+
+        isMatched = true;
+        oldEntry.name = "1_Matched!";
+        nameToDelete = latestContractName;
+        break;
+      }
+      if (isMatched) {
+        this.latestPool = RemoveStorageEntry(this.latestPool, nameToDelete);
+      }
+    }
+
+    for (const contract of this.oldPool) {
+      if (contract.name !== "1_Matched!") {
+        const msg = `Could not find a contract ${contract.source}:${contract.name} in the latest version of contracts!`;
+        this.result[infoField].push(chalk.red(msg));
+      }
+    }
+
+    for (const contract of this.latestPool) {
+      const msg = `Could not find a contract ${contract.source}:${contract.name} in the old version of contracts!`;
+      this.result[infoField].push(chalk.blue(msg));
+    }
+  }
+
+  private normalizeContracts(old: ContractStorageLayout[], latest: ContractStorageLayout[]) {
+    const filteredArray = old.filter((old) => {
+      return this.isInContracts(latest, old);
+    });
+
+    let normalizedLatest: ContractStorageLayout[] = [];
+    let normalizedOld: ContractStorageLayout[] = [];
+
+    if (filteredArray.length != old.length) {
+      for (const entry of old) {
+        if (!this.isInContracts(filteredArray, entry)) {
+          this.oldPool.push(entry);
+          continue;
+        }
+
+        normalizedOld.push(entry);
+      }
+    } else {
+      console.log("Old skipped!");
+      normalizedOld = old;
+    }
+
+    if (filteredArray.length != latest.length) {
+      for (const entry of latest) {
+        if (!this.isInContracts(filteredArray, entry)) {
+          this.latestPool.push(entry);
+          continue;
+        }
+
+        normalizedLatest.push(entry);
+      }
+    } else {
+      console.log("Latest skipped!");
+      normalizedLatest = latest;
+    }
+
+    return [normalizedOld, normalizedLatest];
+  }
+
+  private isInContracts = (latest: ContractStorageLayout[], old: ContractStorageLayout) =>
+    this.findContract(latest, old.name, old.source) !== -1;
 
   private compareStorageLayoutEntries(old: StorageLayoutEntry, latest: StorageLayoutEntry) {
     for (const index in old.storage) {
@@ -38,48 +167,15 @@ export class StorageCompare {
           this.result[contractName] = [];
         }
 
-        const msg = `Warning! New storage layout entry: label ${old.storage[index].label} of ${old.storage[index].type} type in the latest snapshot!`;
-        this.result.messages.push(chalk.yellow(msg));
+        const msg = `Warning! New storage layout entry: label ${latest.storage[index].label} of ${latest.storage[index].type} type in the latest snapshot!`;
+        this.result[contractName].push(chalk.yellow(msg));
       }
     }
-  }
-
-  private compareStorageEntries(contractName: string, old: StorageEntry, latest: StorageEntry) {
-    if (this.result[contractName] === undefined) {
-      this.result[contractName] = [];
-    }
-
-    if (latest === undefined) {
-      const msg = `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!`;
-      this.result[contractName].push(chalk.red(msg));
-      return -1;
-    }
-
-    if (old.slot !== latest.slot) {
-      const msg = `Different slots for label ${old.label} of ${old.type} type! Old slot: ${old.slot} -> Latest slot: ${latest.slot}`;
-      this.result[contractName].push(chalk.red(msg));
-    }
-
-    if (old.offset !== latest.offset) {
-      const msg = `Different offsets for label ${old.label} of ${old.type} type! Old offset: ${old.offset} -> Latest offset: ${latest.offset}`;
-      this.result[contractName].push(chalk.red(msg));
-    }
-
-    if (old.label !== latest.label) {
-      const msg = `Labels in slot ${old.slot} are different! Old label: ${old.label} -> Latest label: ${latest.label}`;
-      this.result[contractName].push(chalk.red(msg));
-    }
-
-    return 0;
   }
 
   private compareTypes(old: StorageLayoutEntry, latest: StorageLayoutEntry, index: number) {
     const oldType = old.storage[index].type;
     const latestType = latest.storage[index].type;
-
-    if (oldType === latestType) {
-      return;
-    }
 
     this.compareTypeEntries(
       oldType,
@@ -165,20 +261,75 @@ export class StorageCompare {
     if (oldTypeEntry.value !== undefined && latestTypeEntry.value !== undefined) {
       this.compareTypeEntries(oldTypeEntry.value, latestTypeEntry.value, oldTypes, latestTypes, contractName, slot);
     }
+
+    if (oldTypeEntry.base !== undefined && latestTypeEntry.base !== undefined) {
+      this.compareTypeEntries(oldTypeEntry.base, latestTypeEntry.base, oldTypes, latestTypes, contractName, slot);
+    }
+  }
+
+  private compareStorageEntries(contractName: string, old: StorageEntry, latest: StorageEntry) {
+    if (old === undefined) {
+      throw new NomicLabsHardhatPluginError(pluginName, "Unintended logic!\n" + "Report a bug, please!");
+    }
+
+    if (this.result[contractName] === undefined) {
+      this.result[contractName] = [];
+    }
+
+    if (latest === undefined) {
+      const msg = `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!`;
+      this.result[contractName].push(chalk.red(msg));
+      return -1;
+    }
+
+    if (old.slot !== latest.slot) {
+      const msg = `Different slots for label ${old.label} of ${old.type} type! Old slot: ${old.slot} -> Latest slot: ${latest.slot}`;
+      this.result[contractName].push(chalk.red(msg));
+    }
+
+    if (old.offset !== latest.offset) {
+      const msg = `Different offsets for label ${old.label} of ${old.type} type! Old offset: ${old.offset} -> Latest offset: ${latest.offset}`;
+      this.result[contractName].push(chalk.red(msg));
+    }
+
+    if (old.label !== latest.label) {
+      const msg = `Labels in slot ${old.slot} are different! Old label: ${old.label} -> Latest label: ${latest.label}`;
+      this.result[contractName].push(chalk.red(msg));
+    }
+
+    return 0;
   }
 
   private findContract(contracts: ContractStorageLayout[], name: string = "", source: string = ""): number {
-    if (source != "") {
+    if (source === "") {
       return contracts.findIndex((element) => {
         return this.isNameOnly(element, name);
       });
     }
 
     return contracts.findIndex((element) => {
-      return this.isFullName(element, source + ":" + name);
+      return this.isFullName(element, `${source}:${name}`);
     });
   }
 
   private isNameOnly = (element: ContractStorageLayout, name: string) => element.name === name;
   private isFullName = (element: ContractStorageLayout, fullName: string) => GetContractFullName(element) === fullName;
+
+  private mergeBuildInfos(
+    old: BuildInfoData[],
+    latest: BuildInfoData[]
+  ): [ContractStorageLayout[], ContractStorageLayout[]] {
+    const mergedOld: ContractStorageLayout[] = [];
+    const mergedLatest: ContractStorageLayout[] = [];
+
+    for (const entry of old) {
+      mergedOld.push(...entry.contracts);
+    }
+
+    for (const entry of latest) {
+      mergedLatest.push(...entry.contracts);
+    }
+
+    return [mergedOld, mergedLatest];
+  }
 }

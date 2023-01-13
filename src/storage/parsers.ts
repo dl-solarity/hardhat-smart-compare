@@ -12,6 +12,7 @@ export function ParseBuildInfo(contract: BuildInfo | undefined): BuildInfoData {
     contracts: parseContracts(contract.output.contracts).sort((a, b) =>
       (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)
     ),
+    format: contract._format,
     solcLongVersion: contract.solcLongVersion,
     solcVersion: contract.solcVersion,
   };
