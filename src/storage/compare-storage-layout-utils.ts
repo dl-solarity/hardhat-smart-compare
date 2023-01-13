@@ -9,7 +9,7 @@ import {
   StorageLayoutEntry,
   TypeEntries,
 } from "./types";
-import { RemoveStorageEntry, IsInContracts, MergeBuildInfos } from "./utils";
+import { removeStorageEntry, isInContracts, mergeBuildInfos } from "./utils";
 
 import chalk from "chalk";
 import isEqual from "lodash.isequal";
@@ -19,38 +19,38 @@ export class StorageCompare {
   private oldPool: ContractStorageLayout[] = [];
   private latestPool: ContractStorageLayout[] = [];
 
-  CompareBuildInfos(oldSnapshot: BuildInfoData[], newSnapshot: BuildInfoData[]): CompareInfo {
-    const [oldContracts, latestContracts] = MergeBuildInfos(oldSnapshot, newSnapshot);
+  compareBuildInfos(oldSnapshot: BuildInfoData[], newSnapshot: BuildInfoData[]): CompareInfo {
+    const [oldContracts, latestContracts] = mergeBuildInfos(oldSnapshot, newSnapshot);
 
-    return this.CompareContractStorageLayouts(oldContracts, latestContracts);
+    return this.compareContractStorageLayouts(oldContracts, latestContracts);
   }
 
-  CompareContractStorageLayouts(old: ContractStorageLayout[], latest: ContractStorageLayout[]): CompareInfo {
+  compareContractStorageLayouts(old: ContractStorageLayout[], latest: ContractStorageLayout[]): CompareInfo {
     const [normalizedOld, normalizedLatest] = this.normalizeContracts(old, latest);
 
     for (let i = 0; i < normalizedOld.length; i++) {
       this.compareStorageLayoutEntries(normalizedOld[i].entries, normalizedLatest[i].entries);
     }
 
-    this.SolveConflicts();
+    this.solveConflicts();
 
     return this.result;
   }
 
-  private SolveConflicts() {
+  private solveConflicts() {
     if (this.oldPool.length === 0 && this.latestPool.length === 0) {
       return;
     }
 
     const infoField = "Conflicts!";
     if (this.result[infoField] === undefined) {
-      this.result[infoField] = [];
+      this.result[infoField] = new Set<string>();
     }
 
     if (this.oldPool.length === 0) {
       for (const contract of this.latestPool) {
-        const msg = `Added new contract: ${contract.source}:${contract.name}`;
-        this.result[infoField].push(chalk.yellowBright(msg));
+        const msg = `Added new contract: ${contract.source}:${contract.name}\n`;
+        this.result[infoField].add(chalk.yellowBright(msg));
       }
 
       return;
@@ -58,12 +58,15 @@ export class StorageCompare {
 
     if (this.latestPool.length === 0) {
       for (const contract of this.oldPool) {
-        const msg = `Deleted contract: ${contract.source}:${contract.name}`;
-        this.result[infoField].push(chalk.redBright(msg));
+        const msg = `Deleted contract: ${contract.source}:${contract.name}\n`;
+        this.result[infoField].add(chalk.redBright(msg));
       }
 
       return;
     }
+
+    let message = `Informational data:\n`;
+    const startMsgLength = message.length;
 
     for (const oldEntry of this.oldPool) {
       let isMatched = false;
@@ -74,23 +77,22 @@ export class StorageCompare {
         const latestContractName = `${latestEntry.source}:${latestEntry.name}`;
 
         if (this.result[oldContractName] === undefined) {
-          this.result[oldContractName] = [];
+          this.result[oldContractName] = new Set<string>();
         }
 
         if (this.result[latestContractName] === undefined) {
-          this.result[latestContractName] = [];
+          this.result[latestContractName] = new Set<string>();
         }
 
         this.compareStorageLayoutEntries(oldEntry.entries, latestEntry.entries);
 
-        if (this.result[oldContractName].length > 0 || this.result[latestContractName].length > 0) {
-          this.result[oldContractName] = [];
-          this.result[latestContractName] = [];
+        if (this.result[oldContractName].size > 0 || this.result[latestContractName].size > 0) {
+          this.result[oldContractName].clear();
+          this.result[latestContractName].clear();
           continue;
         }
 
-        const msg = `Renamed contract from ${oldContractName} to ${latestContractName}`;
-        this.result[infoField].push(chalk.blue(msg));
+        message += `\tRenamed contract from ${oldContractName} to ${latestContractName}\n`;
 
         isMatched = true;
         oldEntry.name = "1_Matched!";
@@ -100,34 +102,34 @@ export class StorageCompare {
       }
 
       if (isMatched) {
-        this.latestPool = RemoveStorageEntry(this.latestPool, nameToDelete);
+        this.latestPool = removeStorageEntry(this.latestPool, nameToDelete);
       }
     }
 
     for (const contract of this.oldPool) {
       if (contract.name !== "1_Matched!") {
-        const msg = `Could not find a contract ${contract.source}:${contract.name} in the latest version of contracts!`;
-        this.result[infoField].push(chalk.red(msg));
+        message += `\tCould not find a contract ${contract.source}:${contract.name} in the latest version of contracts!\n`;
       }
     }
 
     for (const contract of this.latestPool) {
-      const msg = `Could not find a contract ${contract.source}:${contract.name} in the old version of contracts!`;
-      this.result[infoField].push(chalk.blue(msg));
+      message += `\tCould not find a contract ${contract.source}:${contract.name} in the old version of contracts!\n`;
+    }
+
+    if (startMsgLength < message.length) {
+      this.result[infoField].add(chalk.red(message));
     }
   }
 
   private normalizeContracts(old: ContractStorageLayout[], latest: ContractStorageLayout[]) {
-    const filteredArray = old.filter((old) => {
-      return IsInContracts(latest, old);
-    });
+    const filteredArray = old.filter((old) => isInContracts(latest, old));
 
     let normalizedLatest: ContractStorageLayout[] = [];
     let normalizedOld: ContractStorageLayout[] = [];
 
     if (filteredArray.length != old.length) {
       for (const entry of old) {
-        if (!IsInContracts(filteredArray, entry)) {
+        if (!isInContracts(filteredArray, entry)) {
           this.oldPool.push(entry);
           continue;
         }
@@ -140,7 +142,7 @@ export class StorageCompare {
 
     if (filteredArray.length != latest.length) {
       for (const entry of latest) {
-        if (!IsInContracts(filteredArray, entry)) {
+        if (!isInContracts(filteredArray, entry)) {
           this.latestPool.push(entry);
           continue;
         }
@@ -174,11 +176,11 @@ export class StorageCompare {
       for (const index in latest.storage.slice(old.storage.length)) {
         const contractName = latest.storage[index].contract;
         if (this.result[contractName] === undefined) {
-          this.result[contractName] = [];
+          this.result[contractName] = new Set<string>();
         }
 
-        const msg = `Warning! New storage layout entry: label ${latest.storage[index].label} of ${latest.storage[index].type} type in the latest snapshot!`;
-        this.result[contractName].push(chalk.yellow(msg));
+        const msg = `Warning! New storage layout entry: label ${latest.storage[index].label} of ${latest.storage[index].type} type in the latest snapshot!\n`;
+        this.result[contractName].add(chalk.yellow(msg));
       }
     }
   }
@@ -203,21 +205,22 @@ export class StorageCompare {
     }
 
     if (this.result[contractName] === undefined) {
-      this.result[contractName] = [];
+      this.result[contractName] = new Set<string>();
     }
 
-    if (oldTypeEntry.encoding !== latestTypeEntry.encoding) {
-      const msg = `Encoding for latest label ${latestTypeEntry.label} (slot ${slot}) different! Old encoding: ${oldTypeEntry.encoding} -> Latest encoding: ${latestTypeEntry.encoding}`;
-      this.result[contractName].push(chalk.red(msg));
+    let message = `Latest variable with label ${latestTypeEntry.label} (slot ${slot}):\n`;
+    const startMsgLength = message.length;
 
-      return;
+    if (oldTypeEntry.encoding !== latestTypeEntry.encoding) {
+      message += `\tEncoding changed! Old encoding: ${oldTypeEntry.encoding} -> Latest encoding: ${latestTypeEntry.encoding}\n`;
     }
 
     if (oldTypeEntry.numberOfBytes !== latestTypeEntry.numberOfBytes) {
-      const msg = `Number of bytes for latest label ${latestTypeEntry.label} (slot ${slot}) different! Old number of bytes: ${oldTypeEntry.numberOfBytes} -> Latest number of bytes: ${latestTypeEntry.numberOfBytes}`;
-      this.result[contractName].push(chalk.red(msg));
+      message += `\tNumber of bytes changed! Old number of bytes: ${oldTypeEntry.numberOfBytes} -> Latest number of bytes: ${latestTypeEntry.numberOfBytes}\n`;
+    }
 
-      return;
+    if (startMsgLength < message.length) {
+      this.result[contractName].add(chalk.red(message));
     }
 
     if (oldTypeEntry.members !== undefined && latestTypeEntry.members !== undefined) {
@@ -246,11 +249,11 @@ export class StorageCompare {
         for (const index in latestTypeEntry.members.slice(oldTypeEntry.members.length)) {
           const contractName = latestTypeEntry.members[index].contract;
           if (this.result[contractName] === undefined) {
-            this.result[contractName] = [];
+            this.result[contractName] = new Set<string>();
           }
 
-          const msg = `New storage layout entry in struct: label ${oldTypeEntry.members[index].label} of ${oldTypeEntry.members[index].type} type in the latest snapshot!`;
-          this.result.messages.push(chalk.red(msg));
+          const msg = `New storage layout entry in struct: label ${latestTypeEntry.members[index].label} of ${latestTypeEntry.members[index].type} type in the latest snapshot!\n`;
+          this.result[contractName].add(chalk.red(msg));
         }
       }
     }
@@ -270,28 +273,32 @@ export class StorageCompare {
     }
 
     if (this.result[contractName] === undefined) {
-      this.result[contractName] = [];
+      this.result[contractName] = new Set<string>();
     }
 
     if (latest === undefined) {
-      const msg = `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!`;
-      this.result[contractName].push(chalk.red(msg));
+      const msg = `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!\n`;
+      this.result[contractName].add(chalk.red(msg));
       return -1;
     }
 
+    let message = `Variable with label ${old.label} of ${old.type} type:\n`;
+    const startMsgLength = message.length;
+
     if (old.slot !== latest.slot) {
-      const msg = `Different slots for label ${old.label} of ${old.type} type! Old slot: ${old.slot} -> Latest slot: ${latest.slot}`;
-      this.result[contractName].push(chalk.red(msg));
+      message += `\tSlot changed! Old slot: ${old.slot} -> Latest slot: ${latest.slot}\n`;
     }
 
     if (old.offset !== latest.offset) {
-      const msg = `Different offsets for label ${old.label} of ${old.type} type! Old offset: ${old.offset} -> Latest offset: ${latest.offset}`;
-      this.result[contractName].push(chalk.red(msg));
+      message += `\tOffset changed!! Old offset: ${old.offset} -> Latest offset: ${latest.offset}\n`;
     }
 
     if (old.label !== latest.label) {
-      const msg = `Labels in slot ${old.slot} are different! Old label: ${old.label} -> Latest label: ${latest.label}`;
-      this.result[contractName].push(chalk.red(msg));
+      message += `\tLabels changed! Old label: ${old.label} -> Latest label: ${latest.label}\n`;
+    }
+
+    if (startMsgLength < message.length) {
+      this.result[contractName].add(chalk.red(message));
     }
 
     return 0;
