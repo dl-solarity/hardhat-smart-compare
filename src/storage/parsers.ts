@@ -3,11 +3,7 @@ import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import { pluginName } from "../constants";
 import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "./types";
 
-export function ParseBuildInfo(contract: BuildInfo | undefined): BuildInfoData {
-  if (contract === undefined) {
-    throw new NomicLabsHardhatPluginError(pluginName, "Could not match the contract with the related build info file!");
-  }
-
+export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   return {
     contracts: parseContracts(contract.output.contracts).sort((a, b) =>
       (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)

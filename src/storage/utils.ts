@@ -1,30 +1,24 @@
 import { BuildInfoData, ContractStorageLayout } from "./types";
-export const GetContractFullName = (contract: ContractStorageLayout) => {
+export const getContractFullName = (contract: ContractStorageLayout) => {
   return `${contract.source}:${contract.name}`;
 };
 
-export function RemoveStorageEntry(arr: ContractStorageLayout[], value: string) {
+export function removeStorageEntry(arr: ContractStorageLayout[], value: string) {
   return arr.filter(function (elem: ContractStorageLayout) {
     return `${elem.source}:${elem.name}` != value;
   });
 }
 
-export function FindContract(contracts: ContractStorageLayout[], name: string = "", source: string = ""): number {
-  if (source === "") {
-    return contracts.findIndex((element) => {
-      return element.name === name;
-    });
-  }
-
+export function findContract(contracts: ContractStorageLayout[], name: string, source: string): number {
   return contracts.findIndex((element) => {
-    return GetContractFullName(element) === `${source}:${name}`;
+    return getContractFullName(element) === `${source}:${name}`;
   });
 }
 
-export const IsInContracts = (latest: ContractStorageLayout[], old: ContractStorageLayout) =>
-  FindContract(latest, old.name, old.source) !== -1;
+export const isInContracts = (latest: ContractStorageLayout[], old: ContractStorageLayout) =>
+  findContract(latest, old.name, old.source) !== -1;
 
-export function MergeBuildInfos(
+export function mergeBuildInfos(
   old: BuildInfoData[],
   latest: BuildInfoData[]
 ): [ContractStorageLayout[], ContractStorageLayout[]] {

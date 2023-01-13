@@ -42,5 +42,5 @@ export interface BuildInfoData {
 }
 
 export interface CompareInfo {
-  [contract: string]: string[];
+  [contract: string]: Set<string>;
 }

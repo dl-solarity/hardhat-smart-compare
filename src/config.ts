@@ -22,12 +22,20 @@ export const compareConfigExtender: ConfigExtender = (resolvedConfig, config) =>
   }
 };
 
-export function MergeCompareArgs(hre_: HardhatRuntimeEnvironment, args: CompareArgs) {
+export function mergeCompareArgs(hre_: HardhatRuntimeEnvironment, args: CompareArgs) {
   if (args.snapshotPath !== undefined) {
     hre_.config.compare.snapshotPath = args.snapshotPath;
   }
 
   if (args.snapshotFileName !== undefined) {
-    hre_.config.compare.snapshotPath = args.snapshotFileName;
+    hre_.config.compare.snapshotFileName = args.snapshotFileName;
+  }
+
+  if (args.savedSpPath !== undefined) {
+    hre_.config.compare.snapshotPath = args.savedSpPath;
+  }
+
+  if (args.savedSpName !== undefined) {
+    hre_.config.compare.snapshotFileName = args.savedSpName;
   }
 }
