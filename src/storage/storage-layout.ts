@@ -8,6 +8,7 @@ import { BuildInfoData } from "./types";
 import { StorageCompare } from "./compare-storage-layout-utils";
 import isEqual from "lodash.isequal";
 import * as path from "path";
+import { Printer } from "./printer";
 
 export class StorageLayout {
   constructor(private hre_: HardhatRuntimeEnvironment) {}
@@ -16,30 +17,38 @@ export class StorageLayout {
     const savedFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
 
     if (!fs.existsSync(savedFilePath)) {
-      throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved  snapshot of the storage layout!");
+      throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved snapshot of the storage layout!");
     }
 
+    console.log("Start building a new snapshot!");
     const newSnapshot = await this.makeSnapshot();
+    console.log("New snapshot built!");
+
+    console.log("Start reading an old snapshot!");
     const oldSnapshot: BuildInfoData[] = require(savedFilePath);
+    console.log("Old snapshot read!");
 
     if (isEqual(oldSnapshot, newSnapshot)) {
-      console.log("Current snapshot is equal to thr current version of contracts!");
+      console.log("Current snapshot is equal to the current version of contracts!");
       return;
     }
 
     const storageCompare = new StorageCompare();
-    storageCompare.CompareBuildInfos(oldSnapshot, newSnapshot);
+    const result = storageCompare.compareBuildInfos(oldSnapshot, newSnapshot);
+
+    const printer = new Printer(result);
+    printer.print();
   }
 
   async saveSnapshot(fileName: string = "storage_snapshot.json") {
     if (!fs.existsSync(this.hre_.config.compare.snapshotPath)) {
-      fs.mkdirSync(this.hre_.config.compare.snapshotPath);
+      fs.mkdirSync(this.hre_.config.compare.snapshotPath, { recursive: true });
     }
 
     const saveFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
 
     await fs.ensureFile(saveFilePath);
-    await fs.writeJSON(saveFilePath, await this.makeSnapshot(), { spaces: 2 });
+    await fs.writeJSON(saveFilePath, await this.makeSnapshot());
   }
 
   private async makeSnapshot(): Promise<BuildInfoData[]> {
@@ -50,7 +59,10 @@ export class StorageLayout {
       const contract = await this.hre_.artifacts.getBuildInfo(path);
 
       if (contract === undefined) {
-        continue;
+        throw new NomicLabsHardhatPluginError(
+          pluginName,
+          "Could not match the contract with the related build info file!"
+        );
       }
 
       if (inspectedBuildInfos.includes(contract.id)) {
