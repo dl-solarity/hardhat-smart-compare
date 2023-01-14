@@ -2,7 +2,7 @@
 
 # Hardhat Smart Compare
 
-This [Hardhat](https://hardhat.org) plugin facilitate contract upgradability and provides various comparison tools.
+This [Hardhat](https://hardhat.org) plugin facilitates contract upgradability and provides various comparison tools.
 
 ## What
 
@@ -63,7 +63,7 @@ module.exports = {
 
 ### Parameter explanation
 
-- `snapshotPath` : Path to the directory where the saved storage layout snapshot was saved.
+- `snapshotPath` : Path to the directory where the storage layout snapshot is saved.
 - `snapshotFileName` : File name of the snapshot.
 
 [//]: # (## How it works)
