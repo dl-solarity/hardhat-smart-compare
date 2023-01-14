@@ -1,67 +1,71 @@
-[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@dlsl/hardhat-migrate.svg&#41;]&#40;https://www.npmjs.com/package/@dlsl/hardhat-migrate&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
+[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@dlsl/hardhat-smart-compare.svg&#41;]&#40;https://www.npmjs.com/package/@dlsl/hardhat-smart-compare&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
 
-# Hardhat migrate
+# Hardhat Smart Compare
 
-[//]: # ([Hardhat]&#40;https://hardhat.org&#41; plugin to simplify the deployment and verification of contracts.)
+This [Hardhat](https://hardhat.org) plugin facilitates contract upgradability and provides various comparison tools.
 
 ## What
 
-[//]: # (## Installation)
+This plugin helps you make a snapshot of hardhat storage layout and use it for comparison.
 
-[//]: # ()
-[//]: # (```bash)
+With this plugin you could do the following:
+* Compare snapshot with your current version of the smart contracts (SC)
 
-[//]: # (npm install --save-dev @dlsl/hardhat-migrate)
+[//]: # (* Compare snapshots between each other )
 
-[//]: # (```)
+[//]: # (* Compare your current version of the SC with the remote version.)
 
-[//]: # ()
-[//]: # (And add the following statement to your `hardhat.config.js`:)
+## Installation
 
-[//]: # ()
-[//]: # (```js)
+```bash
+npm install --save-dev @dlsl/hardhat-smart-compare
+```
 
-[//]: # (require&#40;"@dlsl/hardhat-migrate"&#41;;)
+And add the following statement to your `hardhat.config.js`:
 
-[//]: # (```)
+```js
+require("@dlsl/hardhat-smart-compare");
+```
 
-[//]: # ()
-[//]: # (Or, if you are using TypeScript, add this to your `hardhat.config.ts`:)
+Or, if you are using TypeScript, add this to your `hardhat.config.ts`:
 
-[//]: # ()
-[//]: # (```ts)
+```ts
+import "@dlsl/hardhat-smart-compare";
+```
 
-[//]: # (import "@dlsl/hardhat-migrate";)
+## Tasks
 
-[//]: # (```)
-
+- `storage:save` task, which allows you to save the snapshot of the storage layout.
+- `storage:compare` task, which allows you to compare the current version of contracts with the previously saved snapshot.
 
 To view the available options, run the command (help command):
 ```bash
-npx hardhat help deploy
+npx hardhat help storage:save 
+npx hardhat help storage:compare 
 ```
 
 ## Environment extensions
 
 This plugin does not extend the environment.
 
-[//]: # (## Usage)
+## Usage
 
-[//]: # (You need to add the following Deploy config to your `hardhat.config.js` file:)
+You may add the following `compare` config to your *hardhat config* file:
 
-[//]: # (```js)
+```js
+module.exports = {
+  compare: {
+    snapshotPath: "./storage_snapshots",
+    snapshotFileName: "storage_snapshot.json",
+  },
+};
+```
 
-[//]: # (module.exports = {)
+### Parameter explanation
 
-[//]: # (  migrate: {},)
+- `snapshotPath` : Path to the directory where the storage layout snapshot is saved.
+- `snapshotFileName` : File name of the snapshot.
 
-[//]: # (};)
-
-[//]: # (```)
-
-[//]: # (### Parameter explanation)
-
-[//]: # ()
 [//]: # (## How it works)
 
 [//]: # (## Known limitations)

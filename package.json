@@ -1,13 +1,14 @@
 {
   "name": "@dlsl/hardhat-smart-compare",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.0-alpha.0",
+  "description": "This package facilitates contract upgradability and provides various comparison tools.",
   "scripts": {
     "install": "npx husky install",
     "compile": "tsc --build .",
-    "build-local": "npm run compile && npm run lint-fix && cp -r ./README.md ./LICENSE ./dist ./src ./publish",
+    "build-local": "npm run compile && npm run lint-fix && bash ./scripts/build-local.sh",
+    "clean": "bash ./scripts/clean.sh",
+    "test": "echo \"No test specified\"",
     "lint-fix": "prettier --write \"./**/*.ts\"",
-    "test": "mocha --recursive \"test/**/*.ts\" --exit",
     "publish-to-npm": "npm run compile && npm run lint-fix && bash ./scripts/publish.sh"
   },
   "repository": {
@@ -37,9 +38,13 @@
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",
+    "@types/fs-extra": "^11.0.0",
+    "@types/lodash.isequal": "^4.5.6",
     "@types/mocha": "^9.1.0",
     "chai": "^4.3.7",
+    "fs-extra": "^11.1.0",
     "husky": "^7.0.2",
+    "lodash.isequal": "^4.5.0",
     "mocha": "^10.0.0",
     "prettier": "^2.7.1",
     "ts-node": "^8.1.0",
