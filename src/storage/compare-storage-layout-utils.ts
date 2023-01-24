@@ -64,9 +64,6 @@ export class StorageCompare {
       return;
     }
 
-    let message = `Informational data:\n`;
-    const startMsgLength = message.length;
-
     for (const oldEntry of this.oldPool) {
       let isMatched = false;
       let nameToDelete = "";
@@ -91,7 +88,8 @@ export class StorageCompare {
           continue;
         }
 
-        message += chalk.blue(`\tRenamed contract from ${oldContractName} to ${latestContractName}\n`);
+        const msg = `Renamed contract from ${oldContractName} to ${latestContractName}\n`;
+        this.result[infoField].add(chalk.blue(msg));
 
         isMatched = true;
         oldEntry.name = "1_Matched!";
@@ -107,20 +105,14 @@ export class StorageCompare {
 
     for (const contract of this.oldPool) {
       if (contract.name !== "1_Matched!") {
-        message += chalk.redBright(
-          `\tCould not find a contract ${contract.source}:${contract.name} in the latest version of contracts!\n`
-        );
+        const msg = `Deleted contract: ${contract.source}:${contract.name}\n`;
+        this.result[infoField].add(chalk.redBright(msg));
       }
     }
 
     for (const contract of this.latestPool) {
-      message += chalk.redBright(
-        `\tCould not find a contract ${contract.source}:${contract.name} in the old version of contracts!\n`
-      );
-    }
-
-    if (startMsgLength !== message.length) {
-      this.result[infoField].add(message);
+      const msg = `Added new contract: ${contract.source}:${contract.name}\n`;
+      this.result[infoField].add(chalk.yellowBright(msg));
     }
   }
 
@@ -156,7 +148,10 @@ export class StorageCompare {
       normalizedLatest = latest;
     }
 
-    return [normalizedOld, normalizedLatest];
+    return [
+      normalizedOld.sort((a, b) => (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)),
+      normalizedLatest.sort((a, b) => (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)),
+    ];
   }
 
   private compareStorageLayoutEntries(old: StorageLayoutEntry, latest: StorageLayoutEntry) {
@@ -176,13 +171,14 @@ export class StorageCompare {
     }
 
     if (old.storage.length < latest.storage.length) {
-      for (const index in latest.storage.slice(old.storage.length)) {
-        const contractName = latest.storage[index].contract;
+      for (const newEntry of latest.storage.slice(old.storage.length)) {
+        const contractName = newEntry.contract;
+
         if (this.result[contractName] === undefined) {
           this.result[contractName] = new Set<string>();
         }
 
-        const msg = `Warning! New storage layout entry: label ${latest.storage[index].label} of ${latest.storage[index].type} type in the latest snapshot!\n`;
+        const msg = `Warning! New storage layout entry: label ${newEntry.label} of ${newEntry.type} type in the latest snapshot!\n`;
         this.result[contractName].add(chalk.yellow(msg));
       }
     }
@@ -245,13 +241,14 @@ export class StorageCompare {
       }
 
       if (oldTypeEntry.members.length < latestTypeEntry.members.length) {
-        for (const index in latestTypeEntry.members.slice(oldTypeEntry.members.length)) {
-          const contractName = latestTypeEntry.members[index].contract;
+        for (const newEntry of latestTypeEntry.members.slice(oldTypeEntry.members.length)) {
+          const contractName = newEntry.contract;
+
           if (this.result[contractName] === undefined) {
             this.result[contractName] = new Set<string>();
           }
 
-          const msg = `New storage layout entry in struct: label ${latestTypeEntry.members[index].label} of ${latestTypeEntry.members[index].type} type in the latest snapshot!\n`;
+          const msg = `New storage layout entry in struct: label ${newEntry.label} of ${newEntry.type} type in the latest snapshot!\n`;
           this.result[contractName].add(chalk.red(msg));
         }
       }

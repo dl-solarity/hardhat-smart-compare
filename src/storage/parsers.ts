@@ -5,9 +5,7 @@ import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "./type
 
 export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   return {
-    contracts: parseContracts(contract.output.contracts).sort((a, b) =>
-      (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)
-    ),
+    contracts: parseContracts(contract.output.contracts),
     format: contract._format,
     solcLongVersion: contract.solcLongVersion,
     solcVersion: contract.solcVersion,
@@ -47,7 +45,7 @@ function extractStorageLayout(output: any): StorageLayoutEntry {
   if (output.storageLayout === undefined) {
     throw new NomicLabsHardhatPluginError(
       pluginName,
-      "Could not extract the storage layout!\n" + "Report a bug, please!"
+      "Could not extract the storage layout!. Remove the artifacts and compile again!"
     );
   }
 
