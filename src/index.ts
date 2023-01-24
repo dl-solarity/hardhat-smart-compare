@@ -5,7 +5,7 @@ import { ActionType } from "hardhat/types";
 
 import { compareConfigExtender, mergeCompareArgs } from "./config";
 import { StorageLayout } from "./storage/storage-layout";
-import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
+import { TASK_CLEAN, TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { CompareArgs } from "./types";
 
 extendConfig(compareConfigExtender);
@@ -14,6 +14,8 @@ const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
   mergeCompareArgs(env, taskArgs);
 
   // Make sure that contract artifacts are up-to-date.
+  await env.run(TASK_CLEAN);
+
   await env.run(TASK_COMPILE, {
     quiet: true,
     force: true,
@@ -27,6 +29,8 @@ const storageCompare: ActionType<CompareArgs> = async (taskArgs, env) => {
   mergeCompareArgs(env, taskArgs);
 
   // Make sure that contract artifacts are up-to-date.
+  await env.run(TASK_CLEAN);
+
   await env.run(TASK_COMPILE, {
     quiet: true,
     force: true,
