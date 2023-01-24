@@ -20,13 +20,8 @@ export class StorageLayout {
       throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved snapshot of the storage layout!");
     }
 
-    console.log("Start building a new snapshot!");
     const newSnapshot = await this.makeSnapshot();
-    console.log("New snapshot built!");
-
-    console.log("Start reading an old snapshot!");
     const oldSnapshot: BuildInfoData[] = require(savedFilePath);
-    console.log("Old snapshot read!");
 
     if (isEqual(oldSnapshot, newSnapshot)) {
       console.log("Current snapshot is equal to the current version of contracts!");
@@ -54,9 +49,9 @@ export class StorageLayout {
   private async makeSnapshot(): Promise<BuildInfoData[]> {
     const inspectedBuildInfos: string[] = [];
     const artifacts = [];
-    const paths = await this.hre_.artifacts.getAllFullyQualifiedNames();
+    const paths = await this.hre_.artifacts.getBuildInfoPaths();
     for (const path of paths) {
-      const contract = await this.hre_.artifacts.getBuildInfo(path);
+      const contract = require(path);
 
       if (contract === undefined) {
         throw new NomicLabsHardhatPluginError(
