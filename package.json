@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/distributedlab-solidity-library/hardhat-smart-compare.git"
+    "url": "git+https://github.com/dl-solidity-library/hardhat-smart-compare.git"
   },
   "keywords": [
     "ethereum",
@@ -26,9 +26,9 @@
   "author": "Distributed Lab",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/distributedlab-solidity-library/hardhat-smart-compare/issues"
+    "url": "https://github.com/dl-solidity-library/hardhat-smart-compare/issues"
   },
-  "homepage": "https://github.com/distributedlab-solidity-library/hardhat-smart-compare#readme",
+  "homepage": "https://github.com/dl-solidity-library/hardhat-smart-compare#readme",
   "dependencies": {
     "hardhat": "^2.10.0",
     "lodash": "^4.17.21"
