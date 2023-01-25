@@ -1,4 +1,4 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { BuildInfo, HardhatRuntimeEnvironment } from "hardhat/types";
 
 import fs from "fs-extra";
 import { ParseBuildInfo } from "./parsers";
@@ -11,7 +11,11 @@ import * as path from "path";
 import { Printer } from "./printer";
 
 export class StorageLayout {
-  constructor(private hre_: HardhatRuntimeEnvironment) {}
+  private storageCompare_: StorageCompare;
+
+  constructor(private hre_: HardhatRuntimeEnvironment) {
+    this.storageCompare_ = new StorageCompare();
+  }
 
   async compareSnapshots(fileName: string = "storage_snapshot.json") {
     const savedFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
@@ -28,11 +32,7 @@ export class StorageLayout {
       return;
     }
 
-    const storageCompare = new StorageCompare();
-    const result = storageCompare.compareBuildInfos(oldSnapshot, newSnapshot);
-
-    const printer = new Printer(result);
-    printer.print();
+    new Printer(this.storageCompare_.compareBuildInfos(oldSnapshot, newSnapshot)).print();
   }
 
   async saveSnapshot(fileName: string = "storage_snapshot.json") {
@@ -47,25 +47,12 @@ export class StorageLayout {
   }
 
   private async makeSnapshot(): Promise<BuildInfoData[]> {
-    const inspectedBuildInfos: string[] = [];
-    const artifacts = [];
+    const artifacts: BuildInfoData[] = [];
     const paths = await this.hre_.artifacts.getBuildInfoPaths();
+
     for (const path of paths) {
-      const contract = require(path);
-
-      if (contract === undefined) {
-        throw new NomicLabsHardhatPluginError(
-          pluginName,
-          "Could not match the contract with the related build info file!"
-        );
-      }
-
-      if (inspectedBuildInfos.includes(contract.id)) {
-        continue;
-      }
-
+      const contract = require(path) as BuildInfo;
       artifacts.push(ParseBuildInfo(contract));
-      inspectedBuildInfos.push(contract.id);
     }
 
     return artifacts;

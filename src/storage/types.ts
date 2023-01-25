@@ -39,8 +39,63 @@ export interface BuildInfoData {
   solcLongVersion: string;
   format: string;
   contracts: ContractStorageLayout[];
+  impactMapping: ImpactMapping;
+}
+
+export enum ChangeType {
+  RemovedContract,
+  NewContract,
+  RenamedContract,
+  NewStorageEntry,
+  MissedStorageEntry,
+  StorageChange,
+  TypeChange,
+}
+
+export interface StorageChangeData {
+  label: [string, string];
+  slot: [string, string];
+  type: [string, string];
+  offset: [number, number];
+}
+
+export const EmptyStorageChangeData: StorageChangeData = {
+  label: ["", ""],
+  slot: ["", ""],
+  type: ["", ""],
+  offset: [-1, -1],
+};
+
+export interface TypeChangeData {
+  label: [string, string];
+  encoding: [string, string];
+  numberOfBytes: [string, string];
+}
+
+export const EmptyTypeChangeData: TypeChangeData = {
+  label: ["", ""],
+  encoding: ["", ""],
+  numberOfBytes: ["", ""],
+};
+
+export interface CompareData {
+  changeType: ChangeType;
+  message?: string;
+  storageChangeData?: StorageChangeData;
+  typeChangeData?: TypeChangeData;
 }
 
 export interface CompareInfo {
-  [contract: string]: Set<string>;
+  [contract: string]: Set<CompareData>;
+}
+
+export interface ImpactMapping {
+  [contract: string]: string[];
+}
+
+export interface InheritanceMapping {
+  [fullContractName: string]: {
+    id: number;
+    linearizedBaseContracts: string[];
+  };
 }
