@@ -2,6 +2,7 @@ import { BuildInfo, CompilerOutputContract } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import { pluginName } from "../constants";
 import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "./types";
+import { getInheritanceImpact } from "./get-inheritance-data";
 
 export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   return {
@@ -9,6 +10,7 @@ export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
     format: contract._format,
     solcLongVersion: contract.solcLongVersion,
     solcVersion: contract.solcVersion,
+    impactMapping: getInheritanceImpact(contract),
   };
 }
 
@@ -45,7 +47,7 @@ function extractStorageLayout(output: any): StorageLayoutEntry {
   if (output.storageLayout === undefined) {
     throw new NomicLabsHardhatPluginError(
       pluginName,
-      "Could not extract the storage layout!. Remove the artifacts and compile again!"
+      "Could not extract the storage layout!. Remove the artifacts and compile again, please!"
     );
   }
 
