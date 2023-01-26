@@ -1,11 +1,12 @@
-import { BuildInfoData, ContractStorageLayout } from "./types";
+import { BuildInfoData, ContractStorageLayout } from "../types";
+
 export const getContractFullName = (contract: ContractStorageLayout) => {
   return `${contract.source}:${contract.name}`;
 };
 
 export function removeStorageEntry(arr: ContractStorageLayout[], value: string) {
-  return arr.filter(function (elem: ContractStorageLayout) {
-    return `${elem.source}:${elem.name}` != value;
+  return arr.filter(function (element: ContractStorageLayout) {
+    return getContractFullName(element) != value;
   });
 }
 

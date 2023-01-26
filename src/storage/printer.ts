@@ -1,23 +1,21 @@
-import { CompareInfo } from "./types";
-import chalk from "chalk";
+import { CompareInfo, ImpactMapping } from "./types";
+import { infoMessage } from "./constants";
 
 export class Printer {
-  constructor(private info: CompareInfo) {}
-  print() {
-    console.log(`\n
-                            Attention! 
-    There have been changes in project variables! 
-    If you do not see errors below, it means that there have been changes in structures that are not related 
-    to the storage itself, for example, they are only used in a functions as a memory type, etc!
-    Pay extra attention to this, maybe the business logic has been changed!\n`);
+  constructor(
+    private buildInfoDiff_: CompareInfo,
+    private contractsDiff_: CompareInfo,
+    private impactMapping_: ImpactMapping
+  ) {}
 
-    for (let [key, value] of Object.entries(this.info)) {
-      if (value.size > 0) {
-        console.log(chalk.bgCyan(`Contract: ${key}\n`));
-        for (const entry of value) {
-          console.log(entry);
-        }
-      }
-    }
+  print() {
+    console.log(infoMessage);
+
+    console.log("Build Info Difference");
+    console.log(this.buildInfoDiff_);
+    console.log("Contracts Difference");
+    console.log(this.contractsDiff_);
+    console.log("Impact Difference");
+    console.log(JSON.stringify(this.impactMapping_, null, 2));
   }
 }

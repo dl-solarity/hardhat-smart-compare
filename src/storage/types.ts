@@ -39,7 +39,6 @@ export interface BuildInfoData {
   solcLongVersion: string;
   format: string;
   contracts: ContractStorageLayout[];
-  impactMapping: ImpactMapping;
 }
 
 export enum ChangeType {
@@ -80,6 +79,7 @@ export const EmptyTypeChangeData: TypeChangeData = {
 
 export interface CompareData {
   changeType: ChangeType;
+  contractName?: string;
   message?: string;
   storageChangeData?: StorageChangeData;
   typeChangeData?: TypeChangeData;

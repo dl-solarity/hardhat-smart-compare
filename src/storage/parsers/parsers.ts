@@ -1,8 +1,8 @@
 import { BuildInfo, CompilerOutputContract } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
-import { pluginName } from "../constants";
-import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "./types";
-import { getInheritanceImpact } from "./get-inheritance-data";
+
+import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "../types";
+import { pluginName } from "../../constants";
 
 export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   return {
@@ -10,7 +10,6 @@ export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
     format: contract._format,
     solcLongVersion: contract.solcLongVersion,
     solcVersion: contract.solcVersion,
-    impactMapping: getInheritanceImpact(contract),
   };
 }
 
