@@ -7,7 +7,7 @@ import * as path from "path";
 
 import { ParseBuildInfo } from "./parsers/parsers";
 import { InheritanceParser } from "./parsers/inheritance-parser";
-import { BuildInfoData } from "./types";
+import { BuildInfoData, Snapshot } from "./types";
 import { Printer } from "./printer";
 import { pluginName } from "../constants";
 import { StorageCompare } from "./comparing-tools/storage-compare";
@@ -28,8 +28,8 @@ export class StorageLayout {
       throw new NomicLabsHardhatPluginError(pluginName, "Could not find saved snapshot of the storage layout!");
     }
 
-    const newSnapshot = await this.makeSnapshot();
-    const oldSnapshot: BuildInfoData[] = require(savedFilePath);
+    const newSnapshot: Snapshot = await this.makeSnapshot();
+    const oldSnapshot: Snapshot = require(savedFilePath);
 
     if (isEqual(oldSnapshot, newSnapshot)) {
       console.log("Current snapshot is equal to the current version of contracts!");
@@ -37,8 +37,9 @@ export class StorageLayout {
     }
 
     new Printer(
-      ...this.storageCompare_.compareBuildInfos(oldSnapshot, newSnapshot),
-      this.inheritanceParser_.result
+      ...this.storageCompare_.compareBuildInfos(oldSnapshot.buildInfos, newSnapshot.buildInfos),
+      oldSnapshot.inheritanceImpact,
+      newSnapshot.inheritanceImpact
     ).print();
   }
 
@@ -53,7 +54,7 @@ export class StorageLayout {
     await fs.writeJSON(saveFilePath, await this.makeSnapshot());
   }
 
-  private async makeSnapshot(): Promise<BuildInfoData[]> {
+  private async makeSnapshot(): Promise<Snapshot> {
     const artifacts: BuildInfoData[] = [];
     const paths = await this.hre_.artifacts.getBuildInfoPaths();
 
@@ -64,7 +65,10 @@ export class StorageLayout {
       artifacts.push(ParseBuildInfo(contract));
     }
 
-    return artifacts;
+    return {
+      buildInfos: artifacts,
+      inheritanceImpact: this.inheritanceParser_.result,
+    };
   }
 
   private resolvePathToFile(path_: string, file_: string = ""): string {

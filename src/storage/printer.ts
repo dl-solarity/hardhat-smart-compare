@@ -5,7 +5,8 @@ export class Printer {
   constructor(
     private buildInfoDiff_: CompareInfo,
     private contractsDiff_: CompareInfo,
-    private impactMapping_: ImpactMapping
+    private impactMappingOld_: ImpactMapping,
+    private impactMappingLatest_: ImpactMapping
   ) {}
 
   print() {
@@ -15,7 +16,5 @@ export class Printer {
     console.log(this.buildInfoDiff_);
     console.log("Contracts Difference");
     console.log(this.contractsDiff_);
-    console.log("Impact Difference");
-    console.log(JSON.stringify(this.impactMapping_, null, 2));
   }
 }

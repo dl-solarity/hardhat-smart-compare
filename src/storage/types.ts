@@ -41,6 +41,11 @@ export interface BuildInfoData {
   contracts: ContractStorageLayout[];
 }
 
+export interface Snapshot {
+  buildInfos: BuildInfoData[];
+  inheritanceImpact: ImpactMapping;
+}
+
 export enum ChangeType {
   RemovedContract,
   NewContract,
