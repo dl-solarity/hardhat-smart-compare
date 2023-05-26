@@ -47,6 +47,12 @@ export class InheritanceParser {
         linearizedBaseContracts: [],
       };
 
+      // This refers to a *.sol file in which the contract is not defined,
+      // for example, as is usually the case with Globals.sol
+      if (contractMapById[id_].linearizedBaseContracts === undefined) {
+        continue;
+      }
+
       for (const bases of contractMapById[id_].linearizedBaseContracts) {
         if (contractMapById[id_].linearizedBaseContracts.length > 1) {
           result[contractMapById[id_].fullContractName].linearizedBaseContracts.push(
