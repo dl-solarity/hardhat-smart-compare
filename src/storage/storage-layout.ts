@@ -1,16 +1,16 @@
-import { BuildInfo, HardhatRuntimeEnvironment } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
+import { BuildInfo, HardhatRuntimeEnvironment } from "hardhat/types";
 
 import fs from "fs-extra";
 import isEqual from "lodash.isequal";
 import * as path from "path";
 
-import { ParseBuildInfo } from "./parsers/parsers";
-import { InheritanceParser } from "./parsers/inheritance-parser";
-import { BuildInfoData, Snapshot } from "./types";
-import { Printer } from "./printer";
 import { pluginName } from "../constants";
 import { StorageCompare } from "./comparing-tools/storage-compare";
+import { InheritanceParser } from "./parsers/inheritance-parser";
+import { ParseBuildInfo } from "./parsers/parsers";
+import { Printer } from "./printer";
+import { BuildInfoData, Snapshot } from "./types";
 
 export class StorageLayout {
   private storageCompare_: StorageCompare;
@@ -45,7 +45,14 @@ export class StorageLayout {
 
   async saveSnapshot(fileName: string) {
     if (!fs.existsSync(this.hre_.config.compare.snapshotPath)) {
-      fs.mkdirSync(this.hre_.config.compare.snapshotPath, { recursive: true });
+      try {
+        fs.mkdirSync(this.hre_.config.compare.snapshotPath, { recursive: true });
+      } catch (e) {
+        throw new NomicLabsHardhatPluginError(
+          pluginName,
+          `Could not create directory for storage layout snapshots: '${this.hre_.config.compare.snapshotPath}'`
+        );
+      }
     }
 
     const saveFilePath = this.resolvePathToFile(this.hre_.config.compare.snapshotPath, fileName);
