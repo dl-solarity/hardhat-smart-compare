@@ -57,30 +57,17 @@ export enum ChangeType {
 }
 
 export interface StorageChangeData {
-  label: [string, string];
-  slot: [string, string];
-  type: [string, string];
-  offset: [number, number];
+  label?: [string, string];
+  slot?: [string, string];
+  type?: [string, string];
+  offset?: [number, number];
 }
-
-export const EmptyStorageChangeData: StorageChangeData = {
-  label: ["", ""],
-  slot: ["", ""],
-  type: ["", ""],
-  offset: [-1, -1],
-};
 
 export interface TypeChangeData {
-  label: [string, string];
-  encoding: [string, string];
-  numberOfBytes: [string, string];
+  label?: [string, string];
+  encoding?: [string, string];
+  numberOfBytes?: [string, string];
 }
-
-export const EmptyTypeChangeData: TypeChangeData = {
-  label: ["", ""],
-  encoding: ["", ""],
-  numberOfBytes: ["", ""],
-};
 
 export interface CompareData {
   changeType: ChangeType;

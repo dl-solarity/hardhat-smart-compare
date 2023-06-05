@@ -1,4 +1,6 @@
 import { BuildInfo } from "hardhat/types";
+import { ContractDefinition, SourceUnit } from "solidity-ast";
+import { astDereferencer, findAll } from "solidity-ast/utils";
 
 import { ImpactMapping, InheritanceMapping } from "../types";
 
@@ -10,9 +12,7 @@ export class InheritanceParser {
 
     for (const contractName in inheritanceTree) {
       for (const bases of inheritanceTree[contractName].linearizedBaseContracts) {
-        if (this.result[bases] === undefined) {
-          this.result[bases] = [];
-        }
+        this.result[bases] ??= [];
 
         this.result[bases].push(contractName);
       }
@@ -20,45 +20,27 @@ export class InheritanceParser {
   }
 
   extractInheritanceTree(buildInfo: BuildInfo): InheritanceMapping {
-    const contractMapById: {
-      [id: number]: {
-        fullContractName: string;
-        linearizedBaseContracts: number[];
-      };
-    } = {};
-
-    for (const [pathName, sources] of Object.entries(buildInfo.output.sources)) {
-      for (const entries of sources.ast["nodes"]) {
-        if (entries.name !== undefined) {
-          const fullContractName = `${pathName}:${entries.name}`;
-          contractMapById[entries.id] = {
-            fullContractName: fullContractName,
-            linearizedBaseContracts: entries.linearizedBaseContracts,
-          };
-        }
-      }
+    function parseFullContractNameFromAstNode(sourceUnit: SourceUnit, node: ContractDefinition): string {
+      return `${sourceUnit.absolutePath}:${node.name}`;
     }
+
+    const deref = astDereferencer(buildInfo.output);
 
     const result: InheritanceMapping = {};
 
-    for (const id_ in contractMapById) {
-      result[contractMapById[id_].fullContractName] = {
-        id: Number(id_),
-        linearizedBaseContracts: [],
-      };
+    for (const sources of Object.values(buildInfo.output.sources)) {
+      const sourceUnit: SourceUnit = sources.ast;
 
-      // This refers to a *.sol file in which the contract is not defined,
-      // for example, as is usually the case with Globals.sol
-      if (contractMapById[id_].linearizedBaseContracts === undefined) {
-        continue;
-      }
+      for (const contract of findAll("ContractDefinition", sourceUnit)) {
+        const fullContractName = parseFullContractNameFromAstNode(sourceUnit, contract);
 
-      for (const bases of contractMapById[id_].linearizedBaseContracts) {
-        if (contractMapById[id_].linearizedBaseContracts.length > 1) {
-          result[contractMapById[id_].fullContractName].linearizedBaseContracts.push(
-            contractMapById[bases].fullContractName
-          );
-        }
+        result[fullContractName] = {
+          id: contract.id,
+          linearizedBaseContracts: contract.linearizedBaseContracts.map((id) => {
+            const { node, sourceUnit } = deref.withSourceUnit("ContractDefinition", id);
+            return parseFullContractNameFromAstNode(sourceUnit, node);
+          }),
+        };
       }
     }
 

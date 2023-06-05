@@ -1,20 +1,19 @@
-import { TASK_STORAGE_SAVE, TASK_STORAGE_COMPARE } from "./constants";
+import { TASK_STORAGE_COMPARE, TASK_STORAGE_SAVE } from "./constants";
 
 import { extendConfig, task, types } from "hardhat/config";
-import { ActionType } from "hardhat/types";
+import { ActionType, HardhatRuntimeEnvironment } from "hardhat/types";
 
+import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { compareConfigExtender, mergeCompareArgs } from "./config";
 import { StorageLayout } from "./storage/storage-layout";
-import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { CompareArgs } from "./types";
 
 import fsExtra from "fs-extra";
 
 extendConfig(compareConfigExtender);
 
-const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
-  mergeCompareArgs(env, taskArgs);
-
+const reCompileArtifacts = async (env: HardhatRuntimeEnvironment) => {
+  // TODO: Do we need to remove artifacts, if we are going to compile force???
   // Make sure that contract artifacts are up-to-date.
   await fsExtra.remove(env.config.paths.artifacts);
 
@@ -22,6 +21,12 @@ const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
     quiet: true,
     force: true,
   });
+};
+
+const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
+  mergeCompareArgs(env, taskArgs);
+
+  await reCompileArtifacts(env);
 
   const storageLayout = new StorageLayout(env);
   await storageLayout.saveSnapshot(env.config.compare.snapshotFileName);
@@ -30,13 +35,7 @@ const storageSave: ActionType<CompareArgs> = async (taskArgs, env) => {
 const storageCompare: ActionType<CompareArgs> = async (taskArgs, env) => {
   mergeCompareArgs(env, taskArgs);
 
-  // Make sure that contract artifacts are up-to-date.
-  await fsExtra.remove(env.config.paths.artifacts);
-
-  await env.run(TASK_COMPILE, {
-    quiet: true,
-    force: true,
-  });
+  await reCompileArtifacts(env);
 
   const storageLayout = new StorageLayout(env);
   await storageLayout.compareSnapshots(env.config.compare.snapshotFileName);

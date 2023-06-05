@@ -1,58 +1,66 @@
 import { ChangeType, CompareData, CompareInfo, ContractStorageLayout } from "../types";
-import { isInContracts, removeStorageEntry } from "./utils";
 import { StorageCompareTools } from "./storage-compare-tools";
+import { getContractFullName, isInContracts, removeStorageEntry } from "./utils";
 
 export class NormalizationTools {
   public inconsistencies: CompareInfo = {};
-  private compareUtil_: StorageCompareTools;
+  private compareUtil_: StorageCompareTools = new StorageCompareTools();
   private oldPool_: ContractStorageLayout[] = [];
   private latestPool_: ContractStorageLayout[] = [];
 
-  constructor() {
-    this.compareUtil_ = new StorageCompareTools();
+  private splitContractsByDifference(
+    previous: ContractStorageLayout[],
+    changed: ContractStorageLayout[]
+  ): {
+    normalized: ContractStorageLayout[];
+    pool: ContractStorageLayout[];
+  } {
+    return previous.reduce(
+      (result, entry) => {
+        return isInContracts(changed, entry)
+          ? { ...result, normalized: [...result.normalized, entry] }
+          : { ...result, pool: [...result.pool, entry] };
+      },
+      { normalized: [] as ContractStorageLayout[], pool: [] as ContractStorageLayout[] }
+    );
   }
 
   normalizeContracts(
     old: ContractStorageLayout[],
     latest: ContractStorageLayout[]
   ): [ContractStorageLayout[], ContractStorageLayout[]] {
-    const filteredArray = old.filter((old) => isInContracts(latest, old));
-
     let normalizedLatest: ContractStorageLayout[] = [];
     let normalizedOld: ContractStorageLayout[] = [];
 
-    if (filteredArray.length != old.length) {
-      for (const entry of old) {
-        if (!isInContracts(filteredArray, entry)) {
-          this.oldPool_.push(entry);
-          continue;
-        }
+    const innerJointContracts = old.filter((old) => isInContracts(latest, old));
 
-        normalizedOld.push(entry);
-      }
-    } else {
-      normalizedOld = old;
-    }
+    const changesBetweenOld = this.splitContractsByDifference(old, innerJointContracts);
+    normalizedOld = changesBetweenOld.normalized;
+    this.oldPool_ = changesBetweenOld.pool;
 
-    if (filteredArray.length != latest.length) {
-      for (const entry of latest) {
-        if (!isInContracts(filteredArray, entry)) {
-          this.latestPool_.push(entry);
-          continue;
-        }
-
-        normalizedLatest.push(entry);
-      }
-    } else {
-      normalizedLatest = latest;
-    }
+    const changesBetweenLatest = this.splitContractsByDifference(latest, innerJointContracts);
+    normalizedLatest = changesBetweenLatest.normalized;
+    this.latestPool_ = changesBetweenLatest.pool;
 
     this.solveConflicts();
 
-    return [
-      normalizedOld.sort((a, b) => (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)),
-      normalizedLatest.sort((a, b) => (a.source + ":" + a.name).localeCompare(b.source + ":" + b.name)),
-    ];
+    function sortContractsByFullName(contracts: ContractStorageLayout[]) {
+      return contracts.sort((a, b) => getContractFullName(a).localeCompare(getContractFullName(b)));
+    }
+
+    return [sortContractsByFullName(normalizedOld), sortContractsByFullName(normalizedLatest)];
+  }
+
+  private parseInconsistenciesFromPool(pool: ContractStorageLayout[], changeType: ChangeType) {
+    for (const contract of pool) {
+      const contractFullName = getContractFullName(contract);
+      this.inconsistencies[contractFullName] ??= new Set<CompareData>();
+
+      this.inconsistencies[contractFullName].add({
+        changeType,
+        contractName: contractFullName,
+      });
+    }
   }
 
   private solveConflicts() {
@@ -61,28 +69,17 @@ export class NormalizationTools {
     }
 
     const infoField = "Informational Data!";
-    if (this.inconsistencies[infoField] === undefined) {
-      this.inconsistencies[infoField] = new Set<CompareData>();
-    }
+
+    this.inconsistencies[infoField] ??= new Set<CompareData>();
 
     if (this.oldPool_.length === 0) {
-      for (const contract of this.latestPool_) {
-        this.inconsistencies[infoField].add({
-          changeType: ChangeType.NewContract,
-          contractName: `${contract.source}:${contract.name}`,
-        });
-      }
+      this.parseInconsistenciesFromPool(this.latestPool_, ChangeType.NewContract);
 
       return;
     }
 
     if (this.latestPool_.length === 0) {
-      for (const contract of this.oldPool_) {
-        this.inconsistencies[infoField].add({
-          changeType: ChangeType.RemovedContract,
-          contractName: `${contract.source}:${contract.name}`,
-        });
-      }
+      this.parseInconsistenciesFromPool(this.oldPool_, ChangeType.RemovedContract);
 
       return;
     }
@@ -90,22 +87,17 @@ export class NormalizationTools {
     for (const oldEntry of this.oldPool_) {
       let isMatched = false;
       let nameToDelete = "";
+      const oldContractName = getContractFullName(oldEntry);
 
       for (const latestEntry of this.latestPool_) {
-        const oldContractName = `${oldEntry.source}:${oldEntry.name}`;
-        const latestContractName = `${latestEntry.source}:${latestEntry.name}`;
+        const latestContractName = getContractFullName(latestEntry);
 
-        if (this.inconsistencies[oldContractName] === undefined) {
-          this.inconsistencies[oldContractName] = new Set<CompareData>();
-        }
-
-        if (this.inconsistencies[latestContractName] === undefined) {
-          this.inconsistencies[latestContractName] = new Set<CompareData>();
-        }
+        this.inconsistencies[oldContractName] ??= new Set<CompareData>();
+        this.inconsistencies[latestContractName] ??= new Set<CompareData>();
 
         this.compareUtil_.compareNormContractStorage(oldEntry.entries, latestEntry.entries);
 
-        if (this.inconsistencies[oldContractName].size > 0 || this.inconsistencies[latestContractName].size > 0) {
+        if (this.inconsistencies[oldContractName].size || this.inconsistencies[latestContractName].size) {
           this.inconsistencies[oldContractName].clear();
           this.inconsistencies[latestContractName].clear();
           continue;
@@ -132,7 +124,7 @@ export class NormalizationTools {
       if (contract.name !== "1_Matched!") {
         this.inconsistencies[infoField].add({
           changeType: ChangeType.RemovedContract,
-          contractName: `${contract.source}:${contract.name}`,
+          contractName: getContractFullName(contract),
         });
       }
     }
@@ -140,7 +132,7 @@ export class NormalizationTools {
     for (const contract of this.latestPool_) {
       this.inconsistencies[infoField].add({
         changeType: ChangeType.NewContract,
-        contractName: `${contract.source}:${contract.name}`,
+        contractName: getContractFullName(contract),
       });
     }
   }

@@ -1,5 +1,5 @@
 import { BuildInfoData, CompareInfo, ContractStorageLayout } from "../types";
-import { mergeBuildInfos } from "./utils";
+import { parseContractStorageLayout } from "./utils";
 import { StorageCompareTools } from "./storage-compare-tools";
 import { NormalizationTools } from "./normalization-tools";
 
@@ -13,7 +13,8 @@ export class StorageCompare {
   }
 
   compareBuildInfos(oldSnapshot: BuildInfoData[], newSnapshot: BuildInfoData[]): [CompareInfo, CompareInfo] {
-    const [oldContracts, latestContracts] = mergeBuildInfos(oldSnapshot, newSnapshot);
+    const oldContracts = parseContractStorageLayout(oldSnapshot);
+    const latestContracts = parseContractStorageLayout(newSnapshot);
 
     return this.compareContractStorageLayouts(oldContracts, latestContracts);
   }
