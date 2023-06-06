@@ -1,7 +1,7 @@
 import { BuildInfoData, CompareInfo, ContractStorageLayout } from "../types";
-import { parseContractStorageLayout } from "./utils";
-import { StorageCompareTools } from "./StorageCompareTools";
 import { NormalizationTools } from "./NormalizationTools";
+import { StorageCompareTools } from "./StorageCompareTools";
+import { parseContractStorageLayout } from "./utils";
 
 export class StorageCompare {
   public compareTool: StorageCompareTools;

@@ -28,7 +28,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(contractStorageLayout, contractStorageLayout);
 
-      assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 0);
+      assert.equal(Object.values(storageCompareTools.result).length, 0);
     });
 
     it("should detect 'New storage layout entry' for different layout", async function () {
@@ -48,7 +48,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(contractStorageLayoutC, contractStorageLayoutD);
 
-      assert.equal(storageCompareTools.result["contracts/C.sol:C"].size, 0);
+      assert.isUndefined(storageCompareTools.result["contracts/C.sol:C"]);
 
       assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 2);
 
@@ -392,7 +392,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(contractStorageLayoutWithStruct, contractStorageLayoutWithStruct);
 
-      assert.equal(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"].size, 0);
+      assert.isUndefined(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"]);
     });
 
     it("should detect new struct fields", async function () {

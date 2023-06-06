@@ -64,7 +64,7 @@ export class NormalizationTools {
   }
 
   private solveConflicts() {
-    if (this.oldPool_.length === 0 && this.latestPool_.length === 0) {
+    if (!this.oldPool_ && !this.latestPool_) {
       return;
     }
 
@@ -72,27 +72,26 @@ export class NormalizationTools {
 
     this.inconsistencies[infoField] ??= new Set<CompareData>();
 
-    if (this.oldPool_.length === 0) {
+    if (!this.oldPool_) {
       this.parseInconsistenciesFromPool(this.latestPool_, ChangeType.NewContract);
 
       return;
     }
 
-    if (this.latestPool_.length === 0) {
+    if (!this.latestPool_) {
       this.parseInconsistenciesFromPool(this.oldPool_, ChangeType.RemovedContract);
 
       return;
     }
 
     for (const oldEntry of this.oldPool_) {
-      let isMatched = false;
-      let nameToDelete = "";
       const oldContractName = getContractFullName(oldEntry);
+
+      this.inconsistencies[oldContractName] ??= new Set<CompareData>();
 
       for (const latestEntry of this.latestPool_) {
         const latestContractName = getContractFullName(latestEntry);
 
-        this.inconsistencies[oldContractName] ??= new Set<CompareData>();
         this.inconsistencies[latestContractName] ??= new Set<CompareData>();
 
         this.compareUtil_.compareNormContractStorage(oldEntry.entries, latestEntry.entries);
@@ -108,15 +107,10 @@ export class NormalizationTools {
           message: `Renamed contract from ${oldContractName} to ${latestContractName}`,
         });
 
-        isMatched = true;
         oldEntry.name = "1_Matched!";
-        nameToDelete = latestContractName;
+        this.latestPool_ = removeStorageEntry(this.latestPool_, latestContractName);
 
         break;
-      }
-
-      if (isMatched) {
-        this.latestPool_ = removeStorageEntry(this.latestPool_, nameToDelete);
       }
     }
 

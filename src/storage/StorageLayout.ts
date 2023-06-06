@@ -14,6 +14,7 @@ import { BuildInfoData, Snapshot } from "./types";
 
 export class StorageLayout {
   private snapshotPath_: string;
+
   constructor(private hre_: HardhatRuntimeEnvironment) {
     this.snapshotPath_ = hre_.config.compare.snapshotPath;
   }
@@ -63,16 +64,15 @@ export class StorageLayout {
   }
 
   private async makeSnapshot(): Promise<Snapshot> {
-    const artifacts: BuildInfoData[] = [];
+    const inheritanceParser = new InheritanceParser();
+
     const paths = await this.hre_.artifacts.getBuildInfoPaths();
 
-    const inheritanceParser = new InheritanceParser();
-    for (const path of paths) {
+    const artifacts = paths.map((path) => {
       const contract = require(path) as BuildInfo;
-
       inheritanceParser.analyzeInheritanceImpact(contract);
-      artifacts.push(ParseBuildInfo(contract));
-    }
+      return ParseBuildInfo(contract);
+    });
 
     return {
       buildInfos: artifacts,

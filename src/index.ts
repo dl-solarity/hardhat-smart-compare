@@ -13,7 +13,6 @@ import fsExtra from "fs-extra";
 extendConfig(compareConfigExtender);
 
 const reCompileArtifacts = async (env: HardhatRuntimeEnvironment) => {
-  // TODO: Do we need to remove artifacts, if we are going to compile force???
   // Make sure that contract artifacts are up-to-date.
   await fsExtra.remove(env.config.paths.artifacts);
 

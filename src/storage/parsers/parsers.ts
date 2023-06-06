@@ -1,12 +1,14 @@
-import { BuildInfo, CompilerOutputContract } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
+import { BuildInfo, CompilerOutputContract } from "hardhat/types";
 
-import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "../types";
 import { pluginName } from "../../constants";
+import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "../types";
 
 export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
+  const contractStorageLayout: ContractStorageLayout[] = parseContracts(contract.output.contracts);
+
   return {
-    contracts: parseContracts(contract.output.contracts),
+    contracts: contractStorageLayout,
     format: contract._format,
     solcLongVersion: contract.solcLongVersion,
     solcVersion: contract.solcVersion,
@@ -14,29 +16,15 @@ export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
 }
 
 function parseContracts(contracts: { [p: string]: { [p: string]: CompilerOutputContract } }): ContractStorageLayout[] {
-  const resultArr = [];
-
-  for (const [sourceName, contractData] of Object.entries(contracts)) {
-    resultArr.push(...parseContractFile(sourceName, contractData));
-  }
-
-  return resultArr;
+  return Object.entries(contracts).flatMap(([sourceName, contractData]) => parseContractFile(sourceName, contractData));
 }
 
 function parseContractFile(source: string, contract: { [p: string]: CompilerOutputContract }): ContractStorageLayout[] {
-  const resultArr = [];
-
-  for (const [contractName, contractStorage] of Object.entries(contract)) {
-    let contractStorageLayout: ContractStorageLayout = {
-      name: contractName,
-      source: source,
-      entries: extractStorageLayout(contractStorage),
-    };
-
-    resultArr.push(contractStorageLayout);
-  }
-
-  return resultArr;
+  return Object.entries(contract).map(([contractName, contractStorage]) => ({
+    name: contractName,
+    source: source,
+    entries: extractStorageLayout(contractStorage),
+  }));
 }
 
 // We need to use `any` type because, `storageLayout` field in evm Object is optional and

@@ -28,10 +28,7 @@ export class StorageCompareTools {
     if (old.storage.length < latest.storage.length) {
       for (const newEntry of latest.storage.slice(old.storage.length)) {
         const contractName = newEntry.contract;
-
-        this.result[contractName] ??= new Set<CompareData>();
-
-        this.result[contractName].add({
+        this.addCompareData(contractName, {
           changeType: ChangeType.NewStorageEntry,
           message: `Warning! New storage layout entry: label ${newEntry.label} of ${newEntry.type} type in the latest snapshot!`,
         });
@@ -50,8 +47,6 @@ export class StorageCompareTools {
   private compareTypeEntries(contractName: string, oldType: string, latestType: string) {
     const changes: TypeChangeData = {};
 
-    this.result[contractName] ??= new Set<CompareData>();
-
     const oldTypeEntry = this.oldTypeEntries[oldType];
     const latestTypeEntry = this.latestTypeEntries[latestType];
 
@@ -68,7 +63,7 @@ export class StorageCompareTools {
     }
 
     if (Object.keys(changes).length) {
-      this.result[contractName].add({
+      this.addCompareData(contractName, {
         changeType: ChangeType.StorageChange,
         typeChangeData: changes,
       });
@@ -83,9 +78,7 @@ export class StorageCompareTools {
         for (const newEntry of latestTypeEntry.members.slice(oldTypeEntry.members.length)) {
           const contractName = newEntry.contract;
 
-          this.result[contractName] ??= new Set<CompareData>();
-
-          this.result[contractName].add({
+          this.addCompareData(contractName, {
             changeType: ChangeType.NewStorageEntry,
             message: `New storage layout entry in struct: label ${newEntry.label} of ${newEntry.type} type in the latest snapshot!`,
           });
@@ -103,10 +96,8 @@ export class StorageCompareTools {
   }
 
   private tryCompareStorageEntries(contractName: string, old: StorageEntry, latest: StorageEntry) {
-    this.result[contractName] ??= new Set<CompareData>();
-
     if (!latest) {
-      this.result[contractName].add({
+      this.addCompareData(contractName, {
         changeType: ChangeType.MissedStorageEntry,
         message: `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!`,
       });
@@ -137,12 +128,15 @@ export class StorageCompareTools {
     }
 
     if (Object.keys(changes).length !== 0) {
-      this.result[contractName].add({
-        changeType: ChangeType.StorageChange,
-        storageChangeData: changes,
-      });
+      this.addCompareData(contractName, { changeType: ChangeType.StorageChange, storageChangeData: changes });
     }
 
     return true;
+  }
+
+  private addCompareData(contractName: string, compareData: CompareData) {
+    this.result[contractName] ??= new Set<CompareData>();
+
+    this.result[contractName].add(compareData);
   }
 }
