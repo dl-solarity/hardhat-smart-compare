@@ -36,7 +36,7 @@ export class InheritanceParser {
 
         result[fullContractName] = {
           id: contract.id,
-          linearizedBaseContracts: contract.linearizedBaseContracts.map((id) => {
+          linearizedBaseContracts: contract.linearizedBaseContracts.slice(1).map((id) => {
             const { node, sourceUnit } = deref.withSourceUnit("ContractDefinition", id);
             return parseFullContractNameFromAstNode(sourceUnit, node);
           }),

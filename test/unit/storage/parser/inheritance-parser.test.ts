@@ -18,13 +18,13 @@ describe("InheritanceParser", () => {
           linearizedBaseContracts: [],
         },
         "contracts/B.sol:B": {
-          linearizedBaseContracts: ["contracts/B.sol:B", "contracts/A.sol:A"],
+          linearizedBaseContracts: ["contracts/A.sol:A"],
         },
         "contracts/C.sol:C": {
-          linearizedBaseContracts: ["contracts/C.sol:C", "contracts/A.sol:A"],
+          linearizedBaseContracts: ["contracts/A.sol:A"],
         },
         "contracts/D.sol:D": {
-          linearizedBaseContracts: ["contracts/D.sol:D", "contracts/B.sol:B", "contracts/C.sol:C", "contracts/A.sol:A"],
+          linearizedBaseContracts: ["contracts/B.sol:B", "contracts/C.sol:C", "contracts/A.sol:A"],
         },
       });
     });
@@ -39,10 +39,9 @@ describe("InheritanceParser", () => {
       inheritanceParser.analyzeInheritanceImpact(buildInfo);
 
       expect(inheritanceParser.result).like({
-        "contracts/B.sol:B": ["contracts/B.sol:B", "contracts/D.sol:D"],
+        "contracts/B.sol:B": ["contracts/D.sol:D"],
         "contracts/A.sol:A": ["contracts/B.sol:B", "contracts/C.sol:C", "contracts/D.sol:D"],
-        "contracts/C.sol:C": ["contracts/C.sol:C", "contracts/D.sol:D"],
-        "contracts/D.sol:D": ["contracts/D.sol:D"],
+        "contracts/C.sol:C": ["contracts/D.sol:D"],
       });
     });
   });

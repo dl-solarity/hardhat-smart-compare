@@ -417,16 +417,31 @@ describe("StorageCompareTools", () => {
         contractStorageLayoutWithStructWithNewField
       );
 
-      assert.equal(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"].size, 1);
+      assert.equal(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"].size, 2);
 
       const expected: Set<CompareData> = new Set([
         {
-          changeType: ChangeType.NewStorageEntry,
-          message: "New storage layout entry in struct: label newField of t_uint256 type in the latest snapshot!",
+          changeType: ChangeType.StorageChange,
+          storageChangeData: { type: ["t_struct(S)36_storage", "t_struct(S)47_storage"] },
+        },
+        {
+          changeType: ChangeType.StorageChange,
+          typeChangeData: { label: ["struct WithStruct.S", "struct WithStructUpdated.S"], numberOfBytes: ["32", "64"] },
         },
       ]);
 
       assert.deepEqual(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"], expected);
+
+      assert.equal(storageCompareTools.result["contracts/WithStructUpdated.sol:WithStructUpdated"].size, 1);
+
+      const expected2: Set<CompareData> = new Set([
+        {
+          changeType: ChangeType.NewStorageEntry,
+          message: "New storage layout entry in struct: label value2 of t_uint256 type in the latest snapshot!",
+        },
+      ]);
+
+      assert.deepEqual(storageCompareTools.result["contracts/WithStructUpdated.sol:WithStructUpdated"], expected2);
     });
   });
 });
