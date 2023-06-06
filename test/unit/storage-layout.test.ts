@@ -1,5 +1,5 @@
 import { assert, expect } from "chai";
-import { StorageLayout } from "../../src/storage/storage-layout";
+import { StorageLayout } from "../../src/storage/StorageLayout";
 import { useEnvironment } from "../helpers";
 
 import fs from "fs-extra";

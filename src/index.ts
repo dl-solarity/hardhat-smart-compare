@@ -5,7 +5,7 @@ import { ActionType, HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { compareConfigExtender, mergeCompareArgs } from "./config";
-import { StorageLayout } from "./storage/storage-layout";
+import { StorageLayout } from "./storage/StorageLayout";
 import { CompareArgs } from "./types";
 
 import fsExtra from "fs-extra";

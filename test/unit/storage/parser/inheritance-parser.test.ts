@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 import { BuildInfo } from "hardhat/types";
-import { InheritanceParser } from "../../../../src/storage/parsers/inheritance-parser";
+import { InheritanceParser } from "../../../../src/storage/parsers/InheritanceParser";
 import { useEnvironment } from "../../../helpers";
 
 describe("InheritanceParser", () => {

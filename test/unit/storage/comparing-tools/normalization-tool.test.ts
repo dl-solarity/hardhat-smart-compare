@@ -1,5 +1,5 @@
 import { BuildInfo } from "hardhat/types";
-import { NormalizationTools } from "../../../../src/storage/comparing-tools/normalization-tools";
+import { NormalizationTools } from "../../../../src/storage/comparing-tools/NormalizationTools";
 import { ParseBuildInfo } from "../../../../src/storage/parsers/parsers";
 import { useEnvironment } from "../../../helpers";
 

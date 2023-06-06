@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 import { BuildInfo } from "hardhat/types";
-import { StorageCompareTools } from "../../../../src/storage/comparing-tools/storage-compare-tools";
+import { StorageCompareTools } from "../../../../src/storage/comparing-tools/StorageCompareTools";
 import { ParseBuildInfo } from "../../../../src/storage/parsers/parsers";
 import {
   ChangeType,

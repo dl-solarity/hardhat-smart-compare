@@ -1,5 +1,5 @@
 import { ChangeType, CompareData, CompareInfo, ContractStorageLayout } from "../types";
-import { StorageCompareTools } from "./storage-compare-tools";
+import { StorageCompareTools } from "./StorageCompareTools";
 import { getContractFullName, isInContracts, removeStorageEntry } from "./utils";
 
 export class NormalizationTools {

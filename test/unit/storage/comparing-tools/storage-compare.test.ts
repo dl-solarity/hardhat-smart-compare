@@ -1,5 +1,5 @@
 import { BuildInfo } from "hardhat/types";
-import { StorageCompare } from "../../../../src/storage/comparing-tools/storage-compare";
+import { StorageCompare } from "../../../../src/storage/comparing-tools/StorageCompare";
 import { ParseBuildInfo } from "../../../../src/storage/parsers/parsers";
 import { useEnvironment } from "../../../helpers";
 

@@ -6,10 +6,10 @@ import isEqual from "lodash.isequal";
 import * as path from "path";
 
 import { pluginName } from "../constants";
-import { StorageCompare } from "./comparing-tools/storage-compare";
-import { InheritanceParser } from "./parsers/inheritance-parser";
+import { StorageCompare } from "./comparing-tools/StorageCompare";
+import { InheritanceParser } from "./parsers/InheritanceParser";
 import { ParseBuildInfo } from "./parsers/parsers";
-import { Printer } from "./printer";
+import { Printer } from "./Printer";
 import { BuildInfoData, Snapshot } from "./types";
 
 export class StorageLayout {

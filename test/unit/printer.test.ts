@@ -2,7 +2,7 @@ import { assert, expect } from "chai";
 import sinon from "sinon";
 import { TASK_STORAGE_COMPARE, TASK_STORAGE_SAVE } from "../../src/constants";
 import { infoMessage } from "../../src/storage/constants";
-import { Printer } from "../../src/storage/printer";
+import { Printer } from "../../src/storage/Printer";
 import { useEnvironment } from "../helpers";
 
 describe("Printer", () => {
