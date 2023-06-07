@@ -1,3 +1,4 @@
+import { assert } from "chai";
 import { BuildInfo } from "hardhat/types";
 import { NormalizationTools } from "../../../../src/storage/comparing-tools/NormalizationTools";
 import { ParseBuildInfo } from "../../../../src/storage/parsers/parsers";
@@ -19,6 +20,8 @@ describe("NormalizationTools", () => {
       )!!;
 
       const [old, latest] = normalizationTools.normalizeContracts([contractStorageLayout], [contractStorageLayout]);
+
+      assert.deepEqual(old, latest);
     });
   });
 });

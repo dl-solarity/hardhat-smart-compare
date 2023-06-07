@@ -8,23 +8,6 @@ export class NormalizationTools {
   private oldPool_: ContractStorageLayout[] = [];
   private latestPool_: ContractStorageLayout[] = [];
 
-  private splitContractsByDifference(
-    previous: ContractStorageLayout[],
-    changed: ContractStorageLayout[]
-  ): {
-    normalized: ContractStorageLayout[];
-    pool: ContractStorageLayout[];
-  } {
-    return previous.reduce(
-      (result, entry) => {
-        return isInContracts(changed, entry)
-          ? { ...result, normalized: [...result.normalized, entry] }
-          : { ...result, pool: [...result.pool, entry] };
-      },
-      { normalized: [] as ContractStorageLayout[], pool: [] as ContractStorageLayout[] }
-    );
-  }
-
   normalizeContracts(
     old: ContractStorageLayout[],
     latest: ContractStorageLayout[]
@@ -49,6 +32,23 @@ export class NormalizationTools {
     }
 
     return [sortContractsByFullName(normalizedOld), sortContractsByFullName(normalizedLatest)];
+  }
+
+  private splitContractsByDifference(
+    previous: ContractStorageLayout[],
+    changed: ContractStorageLayout[]
+  ): {
+    normalized: ContractStorageLayout[];
+    pool: ContractStorageLayout[];
+  } {
+    return previous.reduce(
+      (result, entry) => {
+        return isInContracts(changed, entry)
+          ? { ...result, normalized: [...result.normalized, entry] }
+          : { ...result, pool: [...result.pool, entry] };
+      },
+      { normalized: [] as ContractStorageLayout[], pool: [] as ContractStorageLayout[] }
+    );
   }
 
   private parseInconsistenciesFromPool(pool: ContractStorageLayout[], changeType: ChangeType) {
