@@ -19,20 +19,6 @@ export function findContract(contracts: ContractStorageLayout[], name: string, s
 export const isInContracts = (latest: ContractStorageLayout[], old: ContractStorageLayout) =>
   findContract(latest, old.name, old.source) !== -1;
 
-export function mergeBuildInfos(
-  old: BuildInfoData[],
-  latest: BuildInfoData[]
-): [ContractStorageLayout[], ContractStorageLayout[]] {
-  const mergedOld: ContractStorageLayout[] = [];
-  const mergedLatest: ContractStorageLayout[] = [];
-
-  for (const entry of old) {
-    mergedOld.push(...entry.contracts);
-  }
-
-  for (const entry of latest) {
-    mergedLatest.push(...entry.contracts);
-  }
-
-  return [mergedOld, mergedLatest];
+export function parseContractStorageLayout(buildInfoDataArray: BuildInfoData[]): ContractStorageLayout[] {
+  return buildInfoDataArray.map((buildInfoData) => buildInfoData.contracts).flat();
 }
