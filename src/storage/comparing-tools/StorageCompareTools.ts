@@ -123,7 +123,7 @@ export class StorageCompareTools {
       changes.label = [old.label, latest.label];
     }
 
-    if (old.type !== latest.type) {
+    if (!this.isTypesEqual(contractName, old.type, latest.type) && old.type !== latest.type) {
       changes.type = [old.type, latest.type];
     }
 
@@ -138,5 +138,89 @@ export class StorageCompareTools {
     this.result[contractName] ??= new Set<CompareData>();
 
     this.result[contractName].add(compareData);
+  }
+
+  private isTypesEqual(contractName: string, oldType: string, latestType: string): boolean {
+    const oldTypeEntry = this.oldTypeEntries[oldType];
+    const latestTypeEntry = this.latestTypeEntries[latestType];
+
+    if (oldTypeEntry.label !== latestTypeEntry.label) {
+      return false;
+    }
+
+    if (oldTypeEntry.encoding !== latestTypeEntry.encoding) {
+      return false;
+    }
+
+    if (oldTypeEntry.numberOfBytes !== latestTypeEntry.numberOfBytes) {
+      return false;
+    }
+
+    if (oldTypeEntry.members && latestTypeEntry.members) {
+      if (oldTypeEntry.members.length < latestTypeEntry.members.length) {
+        return false;
+      }
+
+      for (const index in oldTypeEntry.members) {
+        if (!this.isStorageEntriesEqual(contractName, oldTypeEntry.members[index], latestTypeEntry.members[index])) {
+          return false;
+        }
+      }
+    }
+
+    if (oldTypeEntry.value && latestTypeEntry.value) {
+      return this.isTypesEqual(contractName, oldTypeEntry.value, latestTypeEntry.value);
+    }
+
+    if (oldTypeEntry.base && latestTypeEntry.base) {
+      return this.isTypesEqual(contractName, oldTypeEntry.base, latestTypeEntry.base);
+    }
+
+    return true;
+  }
+
+  private isStorageEntriesEqual(
+    contractName: string,
+    oldStorageEntry: StorageEntry,
+    latestStorageEntry: StorageEntry
+  ): boolean {
+    if (!this.isEntriesEqual(contractName, oldStorageEntry, latestStorageEntry)) {
+      return false;
+    }
+
+    return this.isTypesEqual(contractName, oldStorageEntry.type, latestStorageEntry.type);
+  }
+
+  private isEntriesEqual(contractName: string, old: StorageEntry, latest: StorageEntry): boolean {
+    if (!latest) {
+      this.addCompareData(contractName, {
+        changeType: ChangeType.MissedStorageEntry,
+        message: `Missed storage layout entry: label ${old.label} of ${old.type} type in the latest snapshot!`,
+      });
+
+      return false;
+    }
+
+    if (!old) {
+      throw new NomicLabsHardhatPluginError(pluginName, "Unintended logic!\n" + "Report a bug, please!");
+    }
+
+    if (old.slot !== latest.slot) {
+      return false;
+    }
+
+    if (old.offset !== latest.offset) {
+      return false;
+    }
+
+    if (old.label !== latest.label) {
+      return false;
+    }
+
+    if (!this.isTypesEqual(contractName, old.type, latest.type) && old.type !== latest.type) {
+      return false;
+    }
+
+    return true;
   }
 }
