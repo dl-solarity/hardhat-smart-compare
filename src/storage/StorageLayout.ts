@@ -5,12 +5,19 @@ import fs from "fs-extra";
 import isEqual from "lodash.isequal";
 import * as path from "path";
 
-import { pluginName } from "../constants";
-import { StorageCompare } from "./comparing-tools/StorageCompare";
-import { InheritanceParser } from "./parsers/InheritanceParser";
-import { ParseBuildInfo } from "./parsers/parsers";
 import { Printer } from "./Printer";
-import { BuildInfoData, Snapshot } from "./types";
+
+import { Snapshot } from "./types";
+import { infoMessage } from "./constants";
+
+import { ParseBuildInfo } from "./parsers/parsers";
+import { InheritanceParser } from "./parsers/InheritanceParser";
+
+import { isInfosContainsChanges } from "./comparing-tools/utils";
+import { StorageCompare } from "./comparing-tools/StorageCompare";
+
+import { CompareModes } from "../types";
+import { pluginName } from "../constants";
 
 export class StorageLayout {
   private snapshotPath_: string;
@@ -19,7 +26,7 @@ export class StorageLayout {
     this.snapshotPath_ = hre_.config.compare.snapshotPath;
   }
 
-  async compareSnapshots(fileName: string) {
+  async compareSnapshots(fileName: string, mode: string, printDiff: boolean) {
     if (!fs.existsSync(this.snapshotPath_)) {
       throw new NomicLabsHardhatPluginError(pluginName, "Could not find directory for storage layout snapshots!");
     }
@@ -32,17 +39,31 @@ export class StorageLayout {
     const newSnapshot: Snapshot = await this.makeSnapshot();
     const oldSnapshot: Snapshot = require(savedFilePath);
 
-    // TODO: Rewrite isEqual to another
     if (isEqual(oldSnapshot, newSnapshot)) {
-      console.log("Current snapshot is equal to the current version of contracts!");
+      console.info("Current snapshot is equal to the current version of contracts!");
       return;
     }
 
-    new Printer(
-      ...new StorageCompare().compareBuildInfos(oldSnapshot.buildInfos, newSnapshot.buildInfos),
-      oldSnapshot.inheritanceImpact,
-      newSnapshot.inheritanceImpact
-    ).print();
+    const comparisonResult = new StorageCompare().compareBuildInfos(oldSnapshot.buildInfos, newSnapshot.buildInfos);
+
+    if (printDiff) {
+      new Printer(...comparisonResult).print();
+    }
+
+    if (mode === CompareModes.STRICT) {
+      throw new NomicLabsHardhatPluginError(
+        pluginName,
+        "Strict mode! Logic changes or storage layout changes detected!"
+      );
+    }
+
+    if (!printDiff) {
+      console.info(infoMessage);
+    }
+
+    if (mode === CompareModes.SOFT && isInfosContainsChanges(comparisonResult)) {
+      throw new NomicLabsHardhatPluginError(pluginName, "Soft mode! Storage layout changes detected!");
+    }
   }
 
   async saveSnapshot(fileName: string) {

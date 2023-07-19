@@ -6,7 +6,7 @@ import { ActionType, HardhatRuntimeEnvironment } from "hardhat/types";
 import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { compareConfigExtender, mergeCompareArgs } from "./config";
 import { StorageLayout } from "./storage/StorageLayout";
-import { CompareArgs } from "./types";
+import { CompareArgs, CompareModes } from "./types";
 
 import fsExtra from "fs-extra";
 
@@ -37,7 +37,7 @@ const storageCompare: ActionType<CompareArgs> = async (taskArgs, env) => {
   await reCompileArtifacts(env);
 
   const storageLayout = new StorageLayout(env);
-  await storageLayout.compareSnapshots(env.config.compare.snapshotFileName);
+  await storageLayout.compareSnapshots(env.config.compare.snapshotFileName, taskArgs.mode, taskArgs.printDiff);
 };
 
 task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
@@ -51,6 +51,8 @@ task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
   .setAction(storageSave);
 
 task(TASK_STORAGE_COMPARE, "Compare current storage layout with given.")
+  .addParam("mode", "The mode with which the comparison will be running.", CompareModes.NONE, types.string)
+  .addFlag("printDiff", "The flag indicating whether differences should be printed.")
   .addOptionalParam(
     "savedSpPath",
     "Path to the directory where the saved storage layout snapshot was saved.",
