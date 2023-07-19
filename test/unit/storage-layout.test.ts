@@ -3,8 +3,9 @@ import { StorageLayout } from "../../src/storage/StorageLayout";
 import { useEnvironment } from "../helpers";
 
 import fs from "fs-extra";
-import { after, assignWith } from "lodash";
 import sinon from "sinon";
+
+import { CompareModes } from "../../src/types";
 
 describe("StorageLayout", () => {
   useEnvironment("hardhat-project");
@@ -64,9 +65,9 @@ describe("StorageLayout", () => {
     it("should throw if snapshotPath is invalid", async function () {
       const storageLayout = new StorageLayout(this.hre);
 
-      await expect(storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName)).to.be.rejectedWith(
-        `Could not find directory for storage layout snapshots!`
-      );
+      await expect(
+        storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName, CompareModes.STRICT, true)
+      ).to.be.rejectedWith(`Could not find directory for storage layout snapshots!`);
     });
 
     it("should throw if fileName is invalid", async function () {
@@ -74,7 +75,7 @@ describe("StorageLayout", () => {
 
       await storageLayout.saveSnapshot(this.hre.config.compare.snapshotFileName);
 
-      expect(storageLayout.compareSnapshots("bla")).to.be.rejectedWith(
+      expect(storageLayout.compareSnapshots("bla", CompareModes.STRICT, true)).to.be.rejectedWith(
         `Could not find saved snapshot of the storage layout!`
       );
     });
@@ -84,8 +85,8 @@ describe("StorageLayout", () => {
 
       await storageLayout.saveSnapshot(this.hre.config.compare.snapshotFileName);
 
-      let spy = sinon.spy(console, "log");
-      await storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName);
+      let spy = sinon.spy(console, "info");
+      await storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName, CompareModes.STRICT, true);
       assert.isTrue(spy.calledWith("Current snapshot is equal to the current version of contracts!"));
 
       spy.restore();
@@ -99,8 +100,8 @@ describe("compareSnapshots *with differences*", () => {
   it("should print a message if the current snapshot is equal to the saved one", async function () {
     const storageLayout = new StorageLayout(this.hre);
 
-    let spy = sinon.spy(console, "log");
-    await storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName);
+    let spy = sinon.spy(console, "info");
+    await storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName, CompareModes.NONE, true);
     assert.isFalse(spy.calledWith("Current snapshot is equal to the current version of contracts!"));
 
     spy.restore();
