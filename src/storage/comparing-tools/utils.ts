@@ -1,4 +1,4 @@
-import { BuildInfoData, ContractStorageLayout } from "../types";
+import { BuildInfoData, CompareInfo, ContractStorageLayout } from "../types";
 
 export const getContractFullName = (contract: ContractStorageLayout) => {
   return `${contract.source}:${contract.name}`;
@@ -21,4 +21,8 @@ export const isInContracts = (latest: ContractStorageLayout[], old: ContractStor
 
 export function parseContractStorageLayout(buildInfoDataArray: BuildInfoData[]): ContractStorageLayout[] {
   return buildInfoDataArray.map((buildInfoData) => buildInfoData.contracts).flat();
+}
+
+export function isInfosContainsChanges(infos: CompareInfo[]): boolean {
+  return infos.some((info) => Object.values(info).some((value) => value.size > 0));
 }
