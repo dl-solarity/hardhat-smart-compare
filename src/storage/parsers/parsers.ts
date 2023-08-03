@@ -1,8 +1,8 @@
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
-import { BuildInfo, CompilerOutputContract } from "hardhat/types";
+import { BuildInfo } from "hardhat/types";
 
 import { pluginName } from "../../constants";
-import { BuildInfoData, ContractStorageLayout, StorageLayoutEntry } from "../types";
+import { BuildInfoData, ContractBuilds, ContractsData, ContractStorageLayout, StorageLayoutEntry } from "../types";
 
 export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   const contractStorageLayout: ContractStorageLayout[] = parseContracts(contract.output.contracts);
@@ -15,11 +15,11 @@ export function ParseBuildInfo(contract: BuildInfo): BuildInfoData {
   };
 }
 
-function parseContracts(contracts: { [p: string]: { [p: string]: CompilerOutputContract } }): ContractStorageLayout[] {
+function parseContracts(contracts: ContractBuilds): ContractStorageLayout[] {
   return Object.entries(contracts).flatMap(([sourceName, contractData]) => parseContractFile(sourceName, contractData));
 }
 
-function parseContractFile(source: string, contract: { [p: string]: CompilerOutputContract }): ContractStorageLayout[] {
+function parseContractFile(source: string, contract: ContractsData): ContractStorageLayout[] {
   return Object.entries(contract).map(([contractName, contractStorage]) => ({
     name: contractName,
     source: source,

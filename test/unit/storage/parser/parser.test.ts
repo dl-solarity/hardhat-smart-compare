@@ -1,7 +1,6 @@
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { BuildInfo } from "hardhat/types";
 import { ParseBuildInfo } from "../../../../src/storage/parsers/parsers";
-import { ContractStorageLayout } from "../../../../src/storage/types";
 import { useEnvironment } from "../../../helpers";
 
 describe("parser", () => {

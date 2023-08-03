@@ -1,5 +1,7 @@
 // Here you can find an explanation of each field in the following interface:
 // https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html#json-output
+import { CompilerOutputContract } from "hardhat/types";
+
 export interface StorageEntry {
   astId: number;
   contract: string;
@@ -90,4 +92,12 @@ export interface InheritanceMapping {
     id: number;
     linearizedBaseContracts: string[];
   };
+}
+
+export interface ContractBuilds {
+  [p: string]: ContractsData;
+}
+
+export interface ContractsData {
+  [p: string]: CompilerOutputContract;
 }
