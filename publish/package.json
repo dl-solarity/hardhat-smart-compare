@@ -1,6 +1,6 @@
 {
   "name": "@dlsl/hardhat-smart-compare",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0",
   "description": "This package facilitates contract upgradability and provides various comparison tools.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
