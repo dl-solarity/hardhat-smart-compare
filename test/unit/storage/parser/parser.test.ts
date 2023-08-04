@@ -68,6 +68,7 @@ describe("parser", () => {
         },
       },
     };
+
     expect(result.contracts[3]).like(expected);
   });
 });
