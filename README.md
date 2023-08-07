@@ -2,19 +2,14 @@
 
 # Hardhat Smart Compare
 
-This [Hardhat](https://hardhat.org) plugin facilitates contract upgradability and provides various comparison tools.
+[Hardhat](https://hardhat.org) plugin to create a snapshot of the smart contract storage layout.
+Later, this snapshot can be compared with the latest version of the contracts.
 
 ## What
 
-This plugin helps you make a snapshot of hardhat storage layout and use it for comparison.
-
-With this plugin you could do the following:
-
-* Compare snapshot with your current version of the smart contracts (SC)
-
-[//]: # (* Compare snapshots between each other )
-
-[//]: # (* Compare your current version of the SC with the remote version.)
+This plugin generates a storage layout snapshot of the contracts in the project.
+It is precious for upgradable systems, as it helps you verify that the storage layout of the proxy contracts 
+remains unchanged after the upgrade is done.
 
 ## Installation
 
@@ -36,6 +31,8 @@ import "@dlsl/hardhat-smart-compare";
 
 ## Tasks
 
+There are two tasks:
+
 * `storage:save` task, which allows you to save the snapshot of the storage layout.
 * `storage:compare` task, which allows you to compare the current version of contracts with the previously saved snapshot.
 
@@ -52,11 +49,55 @@ This plugin does not extend the environment.
 
 ## Usage
 
-The plugin works out of the box: `npx hardhat storage:save` will recompile artifacts and generates special storage snapshot for all the contracts used in the project into the default folder.
+To make a snapshot of the storage layout, run the following command:
+
+```bash
+npx hardhat storage:save
+```
+
+To compare the current version of contracts with the previously saved snapshot, run the following command:
+
+```bash
+npx hardhat storage:compare
+```
+
+### How it works
+
+The plugin completes the `compile` task, retrieves artifacts from the *Hardhat Runtime Environment (HRE)*, and performs the following actions depending on the task:
+
+- `save`: 
+
+It will parse the `build-info` file to get the compiler output and retrieve storage layout of contracts from the 
+outputSelection field.
+
+If the `outputSelection` is missed it will be automatically added to the `hardhat.config.js` file before the compilation:
+
+```js
+module.exports = {
+  // ...
+  solidity: {
+    version: "0.8.20",
+    outputSelection: {
+      "*": {
+        "*": ["storageLayout"],
+      },
+    },
+  },
+  // ...
+};
+```
+ 
+After it parses and saves the storage layout for each contract with an inheritance "map" in a JSON file.
+
+- `compare`:
+
+Initially, it will execute the same steps as the `save` task. 
+It will then thoroughly compare the existing snapshot and the newly generated version, scrutinizing each field and type. 
+Ultimately, if the `--print-diff` flag is provided, it will display any differences that were identified.
 
 ### Configuration
 
-The default configuration looks as follows. You may customize all fields in your *hardhat config* file.
+The default configuration looks as follows. You may customize all fields in your **hardhat config** file.
 
 ```js
 module.exports = {
@@ -69,64 +110,10 @@ module.exports = {
 
 ### Parameter explanation
 
-* `snapshotPath` : Path to the directory where the storage layout snapshot is saved.
-* `snapshotFileName` : File name of the snapshot.
+* `snapshotPath`: Path to the directory where the storage layout snapshot is saved.
+* `snapshotFileName`: File name of the snapshot.
 
-## How it works
+## Known limitations
 
-The plugin runs `compile` task, gets the artifacts from *Hardhat Runtime Environment* (HRE) and performs the following actions:
-
-* `save` task: Writes contract's storage layouts, type definitions and inheritance impact of each contract into a file specified in the config.
-* `compare` task: Generate the same data for the current version of the contracts and compares it with the previously saved snapshot, including the normalization(solving problem with different order of the fields in the storage and inheritance) and comparison of the each field of the storage based on the type, name.
-
-### Storage layout pattern
-
-``` json
-{
-  buildInfos: [
-    {
-      solcVersion: string,
-      solcLongVersion: string,
-      format: string,
-      contracts: [
-        name: string,
-        source: string,
-        entries: {
-          storage:[
-            astId: number,
-            contract: string,
-            label: string,
-            offset: number,
-            slot: string,
-            type: string
-          ],
-          types: {
-            [type_name: string]:  {
-              base?: string,
-              encoding: string,
-              key?: string,
-              label: string,
-              members?: [
-                {  
-                  astId: number;
-                  contract: string;
-                  label: string;
-                  offset: number;
-                  slot: string;
-                  type: string;
-                }
-              ],
-              numberOfBytes: string
-            }
-          },
-        }
-      ]
-    }
-  ]
-  inheritanceImpact: {
-     [contract: string]: string[]
-  }
-}
-```
-
-[//]: # (## Known limitations)
+* Doesn't detect non-storage variables changes.
+* `Vyper` is currently not supported.
