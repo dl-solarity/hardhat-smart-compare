@@ -1,24 +1,29 @@
-import { ConfigExtender, HardhatRuntimeEnvironment } from "hardhat/types";
+import { ConfigExtender, HardhatConfig, HardhatRuntimeEnvironment, HardhatUserConfig } from "hardhat/types";
 
 import { CompareArgs } from "./types";
 
-export const compareConfigExtender: ConfigExtender = (resolvedConfig, config) => {
+export const compareConfigExtender: ConfigExtender = (
+  config: HardhatConfig,
+  userConfig: Readonly<HardhatUserConfig>
+) => {
   const defaultConfig = {
     snapshotPath: "./storage_snapshots",
     snapshotFileName: "storage_snapshot.json",
   };
 
-  if (config.compare !== undefined) {
+  if (userConfig.compare !== undefined) {
     const { cloneDeep } = require("lodash");
     const customConfig = cloneDeep(config.compare);
 
-    resolvedConfig.compare = { ...defaultConfig, ...customConfig };
+    config.compare = { ...defaultConfig, ...customConfig };
   } else {
-    resolvedConfig.compare = defaultConfig;
+    config.compare = defaultConfig;
   }
 
-  for (let compiler of resolvedConfig.solidity.compilers) {
-    compiler.settings.outputSelection["*"]["*"].push("storageLayout");
+  if (config.solidity !== undefined && config.solidity.compilers !== undefined) {
+    for (let compiler of config.solidity.compilers) {
+      compiler.settings.outputSelection["*"]["*"].push("storageLayout");
+    }
   }
 };
 
