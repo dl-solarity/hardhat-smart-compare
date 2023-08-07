@@ -2,8 +2,7 @@
 
 # Hardhat Smart Compare
 
-[Hardhat](https://hardhat.org) plugin to create a snapshot of the smart contract storage layout.
-Later, this snapshot can be compared with the latest version of the contracts.
+[Hardhat](https://hardhat.org) plugin to compare contracts between upgrades to ensure storage compatibility. 
 
 ## What
 
@@ -68,26 +67,8 @@ The plugin completes the `compile` task, retrieves artifacts from the *Hardhat R
 - `save`: 
 
 It will parse the `build-info` file to get the compiler output and retrieve storage layout of contracts from the 
-outputSelection field.
-
-If the `outputSelection` is missed it will be automatically added to the `hardhat.config.js` file before the compilation:
-
-```js
-module.exports = {
-  // ...
-  solidity: {
-    version: "0.8.20",
-    outputSelection: {
-      "*": {
-        "*": ["storageLayout"],
-      },
-    },
-  },
-  // ...
-};
-```
- 
-After it parses and saves the storage layout for each contract with an inheritance "map" in a JSON file.
+`outputSelection` field.
+After that it will parse and save the storage layout for each contract with an inheritance "map" in a JSON file.
 
 - `compare`:
 
@@ -116,4 +97,5 @@ module.exports = {
 ## Known limitations
 
 * Doesn't detect non-storage variables changes.
+* Printed results are hard to comprehend.
 * `Vyper` is currently not supported.
