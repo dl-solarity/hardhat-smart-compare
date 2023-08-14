@@ -1,6 +1,6 @@
 {
   "name": "@solarity/hardhat-smart-compare",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Compare contracts between upgrades to ensure compatibility.",
   "scripts": {
     "install": "npx husky install",
