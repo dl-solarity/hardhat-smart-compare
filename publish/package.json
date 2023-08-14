@@ -1,5 +1,5 @@
 {
-  "name": "@dlsl/hardhat-smart-compare",
+  "name": "@solarity/hardhat-smart-compare",
   "version": "0.1.1",
   "description": "Compare contracts between upgrades to ensure compatibility.",
   "main": "dist/src/index.js",

@@ -1,4 +1,4 @@
-[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@dlsl/hardhat-smart-compare.svg&#41;]&#40;https://www.npmjs.com/package/@dlsl/hardhat-smart-compare&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
+[//]: # ([![npm]&#40;https://img.shields.io/npm/v/@solarity/hardhat-smart-compare.svg&#41;]&#40;https://www.npmjs.com/package/@solarity/hardhat-smart-compare&#41; [![hardhat]&#40;https://hardhat.org/buidler-plugin-badge.svg?1&#41;]&#40;https://hardhat.org&#41;)
 
 # Hardhat Smart Compare
 
@@ -13,19 +13,19 @@ remains unchanged after the upgrade is done.
 ## Installation
 
 ```bash
-npm install --save-dev @dlsl/hardhat-smart-compare
+npm install --save-dev @solarity/hardhat-smart-compare
 ```
 
 And add the following statement to your `hardhat.config.js`:
 
 ```js
-require("@dlsl/hardhat-smart-compare");
+require("@solarity/hardhat-smart-compare");
 ```
 
 Or, if you are using TypeScript, add this to your `hardhat.config.ts`:
 
 ```ts
-import "@dlsl/hardhat-smart-compare";
+import "@solarity/hardhat-smart-compare";
 ```
 
 ## Tasks
