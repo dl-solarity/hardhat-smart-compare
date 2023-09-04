@@ -1,17 +1,15 @@
 {
   "name": "@solarity/hardhat-smart-compare",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Compare contracts between upgrades to ensure compatibility.",
-  "scripts": {
-    "install": "npx husky install",
-    "compile": "tsc --build .",
-    "build-local": "npm run compile && npm run lint-fix && bash ./scripts/build-local.sh",
-    "clean": "bash ./scripts/clean.sh",
-    "test": "mocha --recursive \"test/**/*.ts\" --exit",
-    "coverage": "nyc --reporter=lcov --reporter=text npm run test ",
-    "lint-fix": "prettier --write \"./**/*.ts\"",
-    "publish-to-npm": "npm run compile && npm run lint-fix && bash ./scripts/publish.sh"
-  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/src/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dl-solarity/hardhat-smart-compare.git"
@@ -22,7 +20,8 @@
     "smart-contracts",
     "hardhat",
     "hardhat-plugin",
-    "distributedlab"
+    "distributedlab",
+    "solarity"
   ],
   "author": "Distributed Lab",
   "license": "MIT",
@@ -30,10 +29,17 @@
     "url": "https://github.com/dl-solarity/hardhat-smart-compare/issues"
   },
   "homepage": "https://github.com/dl-solarity/hardhat-smart-compare#readme",
+  "scripts": {
+    "install": "npx husky install",
+    "build": "tsc --build .",
+    "test": "mocha --recursive \"test/**/*.ts\" --exit",
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test ",
+    "lint-fix": "prettier --write \"./**/*.ts\"",
+    "publish-to-npm": "npm run build && npm run lint-fix && npm publish ./ --access public"
+  },
   "dependencies": {
-    "hardhat": "^2.10.0",
-    "lodash": "^4.17.21",
-    "solidity-ast": "^0.4.49"
+    "lodash": "4.17.21",
+    "solidity-ast": "0.4.49"
   },
   "peerDependencies": {
     "hardhat": "^2.10.0"
