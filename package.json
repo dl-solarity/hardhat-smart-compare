@@ -1,38 +1,39 @@
 {
-  "name": "@dlsl/hardhat-smart-compare",
-  "version": "0.1.1",
+  "name": "@solarity/hardhat-smart-compare",
+  "version": "0.1.2",
   "description": "Compare contracts between upgrades to ensure compatibility.",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
-  "files": [
-    "dist/src/",
-    "src/",
-    "LICENSE",
-    "README.md"
-  ],
+  "scripts": {
+    "install": "npx husky install",
+    "compile": "tsc --build .",
+    "build-local": "npm run compile && npm run lint-fix && bash ./scripts/build-local.sh",
+    "clean": "bash ./scripts/clean.sh",
+    "test": "mocha --recursive \"test/**/*.ts\" --exit",
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test ",
+    "lint-fix": "prettier --write \"./**/*.ts\"",
+    "publish-to-npm": "npm run compile && npm run lint-fix && bash ./scripts/publish.sh"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dl-solidity-library/hardhat-smart-compare.git"
+    "url": "git+https://github.com/dl-solarity/hardhat-smart-compare.git"
   },
   "keywords": [
-    "storage-layout",
     "ethereum",
     "solidity",
     "smart-contracts",
     "hardhat",
     "hardhat-plugin",
-    "distributedlab",
-    "solarity"
+    "distributedlab"
   ],
   "author": "Distributed Lab",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dl-solidity-library/hardhat-smart-compare/issues"
+    "url": "https://github.com/dl-solarity/hardhat-smart-compare/issues"
   },
-  "homepage": "https://github.com/dl-solidity-library/hardhat-smart-compare#readme",
+  "homepage": "https://github.com/dl-solarity/hardhat-smart-compare#readme",
   "dependencies": {
-    "lodash": "4.17.21",
-    "solidity-ast": "0.4.49"
+    "hardhat": "^2.10.0",
+    "lodash": "^4.17.21",
+    "solidity-ast": "^0.4.49"
   },
   "peerDependencies": {
     "hardhat": "^2.10.0"
