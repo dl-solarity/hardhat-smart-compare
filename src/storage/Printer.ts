@@ -2,7 +2,10 @@ import { infoMessage } from "./constants";
 import { ChangeType, CompareData, CompareInfo } from "./types";
 
 export class Printer {
-  constructor(private buildInfoDiff_: CompareInfo, private contractsDiff_: CompareInfo) {}
+  constructor(
+    private buildInfoDiff_: CompareInfo,
+    private contractsDiff_: CompareInfo,
+  ) {}
 
   print() {
     console.info(infoMessage);

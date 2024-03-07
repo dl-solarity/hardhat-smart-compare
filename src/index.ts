@@ -45,7 +45,7 @@ task(TASK_STORAGE_SAVE, "Saves the contract storage layout")
     "snapshotPath",
     "Path to the directory where you want to save the storage layout snapshot.",
     undefined,
-    types.string
+    types.string,
   )
   .addOptionalParam("snapshotFileName", "Future file name of the snapshot.", undefined, types.string)
   .setAction(storageSave);
@@ -57,7 +57,7 @@ task(TASK_STORAGE_COMPARE, "Compare current storage layout with given.")
     "savedSpPath",
     "Path to the directory where the saved storage layout snapshot was saved.",
     undefined,
-    types.string
+    types.string,
   )
   .addOptionalParam("savedSpName", "File name of the saved snapshot.", undefined, types.string)
   .setAction(storageCompare);

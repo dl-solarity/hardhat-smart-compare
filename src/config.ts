@@ -4,7 +4,7 @@ import { CompareArgs } from "./types";
 
 export const compareConfigExtender: ConfigExtender = (
   config: HardhatConfig,
-  userConfig: Readonly<HardhatUserConfig>
+  userConfig: Readonly<HardhatUserConfig>,
 ) => {
   const defaultConfig = {
     snapshotPath: "./storage_snapshots",

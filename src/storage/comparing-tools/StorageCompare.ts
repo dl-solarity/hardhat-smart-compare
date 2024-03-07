@@ -21,7 +21,7 @@ export class StorageCompare {
 
   compareContractStorageLayouts(
     old: ContractStorageLayout[],
-    latest: ContractStorageLayout[]
+    latest: ContractStorageLayout[],
   ): [CompareInfo, CompareInfo] {
     const [normalizedOld, normalizedLatest] = this.normalizationTool.normalizeContracts(old, latest);
 

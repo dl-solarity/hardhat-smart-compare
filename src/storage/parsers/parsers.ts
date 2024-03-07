@@ -34,7 +34,7 @@ function extractStorageLayout(output: any): StorageLayoutEntry {
   if (output.storageLayout === undefined) {
     throw new NomicLabsHardhatPluginError(
       pluginName,
-      "Could not extract the storage layout!. Remove the artifacts and compile again, please!"
+      "Could not extract the storage layout!. Remove the artifacts and compile again, please!",
     );
   }
 

@@ -53,7 +53,7 @@ export class StorageLayout {
     if (mode === CompareModes.STRICT) {
       throw new NomicLabsHardhatPluginError(
         pluginName,
-        "Strict mode! Logic changes or storage layout changes detected!"
+        "Strict mode! Logic changes or storage layout changes detected!",
       );
     }
 
@@ -73,7 +73,7 @@ export class StorageLayout {
       } catch (e) {
         throw new NomicLabsHardhatPluginError(
           pluginName,
-          `Could not create directory for storage layout snapshots: '${this.snapshotPath_}'`
+          `Could not create directory for storage layout snapshots: '${this.snapshotPath_}'`,
         );
       }
     }

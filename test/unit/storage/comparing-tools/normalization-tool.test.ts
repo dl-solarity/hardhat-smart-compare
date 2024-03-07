@@ -16,7 +16,7 @@ describe("NormalizationTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayout = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!;
 
       const [old, latest] = normalizationTools.normalizeContracts([contractStorageLayout], [contractStorageLayout]);

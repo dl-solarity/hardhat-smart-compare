@@ -10,7 +10,7 @@ export class NormalizationTools {
 
   normalizeContracts(
     old: ContractStorageLayout[],
-    latest: ContractStorageLayout[]
+    latest: ContractStorageLayout[],
   ): [ContractStorageLayout[], ContractStorageLayout[]] {
     let normalizedLatest: ContractStorageLayout[] = [];
     let normalizedOld: ContractStorageLayout[] = [];
@@ -36,7 +36,7 @@ export class NormalizationTools {
 
   private splitContractsByDifference(
     previous: ContractStorageLayout[],
-    changed: ContractStorageLayout[]
+    changed: ContractStorageLayout[],
   ): {
     normalized: ContractStorageLayout[];
     pool: ContractStorageLayout[];
@@ -47,7 +47,7 @@ export class NormalizationTools {
           ? { ...result, normalized: [...result.normalized, entry] }
           : { ...result, pool: [...result.pool, entry] };
       },
-      { normalized: [] as ContractStorageLayout[], pool: [] as ContractStorageLayout[] }
+      { normalized: [] as ContractStorageLayout[], pool: [] as ContractStorageLayout[] },
     );
   }
 

@@ -23,9 +23,9 @@ describe("storage task", () => {
       await expect(
         this.hre.run(TASK_STORAGE_SAVE, {
           snapshotPath: "\0\\/",
-        })
+        }),
       ).to.be.rejectedWith(
-        `Could not create directory for storage layout snapshots: '${this.hre.config.compare.snapshotPath}'`
+        `Could not create directory for storage layout snapshots: '${this.hre.config.compare.snapshotPath}'`,
       );
     });
   });

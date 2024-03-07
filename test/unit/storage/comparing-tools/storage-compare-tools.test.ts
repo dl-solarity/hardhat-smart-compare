@@ -23,7 +23,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayout = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       storageCompareTools.compareNormContractStorage(contractStorageLayout, contractStorageLayout);
@@ -39,11 +39,11 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutC = buildInfoData.contracts.find(
-        (contract) => contract.name === "C" && contract.source === "contracts/C.sol"
+        (contract) => contract.name === "C" && contract.source === "contracts/C.sol",
       )!!.entries;
 
       storageCompareTools.compareNormContractStorage(contractStorageLayoutC, contractStorageLayoutD);
@@ -75,11 +75,11 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutC = buildInfoData.contracts.find(
-        (contract) => contract.name === "C" && contract.source === "contracts/C.sol"
+        (contract) => contract.name === "C" && contract.source === "contracts/C.sol",
       )!!.entries;
 
       storageCompareTools.compareNormContractStorage(contractStorageLayoutD, contractStorageLayoutC);
@@ -109,7 +109,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedSlot = {
@@ -132,7 +132,7 @@ describe("StorageCompareTools", () => {
             changeType: ChangeType.StorageChange,
             storageChangeData: expectedStorageChangeData,
           };
-        })
+        }),
       );
 
       assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 4);
@@ -148,7 +148,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedOffset = {
@@ -171,7 +171,7 @@ describe("StorageCompareTools", () => {
             changeType: ChangeType.StorageChange,
             storageChangeData: expectedStorageChangeData,
           };
-        })
+        }),
       );
 
       assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 4);
@@ -187,7 +187,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedLabel = {
@@ -210,7 +210,7 @@ describe("StorageCompareTools", () => {
             changeType: ChangeType.StorageChange,
             storageChangeData: expectedStorageChangeData,
           };
-        })
+        }),
       );
 
       assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 4);
@@ -226,7 +226,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedType: StorageLayoutEntry = {
@@ -257,7 +257,7 @@ describe("StorageCompareTools", () => {
             changeType: ChangeType.StorageChange,
             storageChangeData: expectedStorageChangeData,
           };
-        })
+        }),
       );
 
       assert.equal(storageCompareTools.result["contracts/D.sol:D"].size, 8);
@@ -273,7 +273,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedTypeLabel: StorageLayoutEntry = {
@@ -285,7 +285,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(
         contractStorageLayoutD,
-        contractStorageLayoutDWithChangedTypeLabel
+        contractStorageLayoutDWithChangedTypeLabel,
       );
 
       const expectedTypeChangeData: TypeChangeData = {
@@ -311,7 +311,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedTypeEncoding: StorageLayoutEntry = {
@@ -323,7 +323,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(
         contractStorageLayoutD,
-        contractStorageLayoutDWithChangedTypeEncoding
+        contractStorageLayoutDWithChangedTypeEncoding,
       );
 
       const expectedTypeChangeData: TypeChangeData = {
@@ -349,7 +349,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutD = buildInfoData.contracts.find(
-        (contract) => contract.name === "D" && contract.source === "contracts/D.sol"
+        (contract) => contract.name === "D" && contract.source === "contracts/D.sol",
       )!!.entries;
 
       const contractStorageLayoutDWithChangedTypeEncoding: StorageLayoutEntry = {
@@ -361,7 +361,7 @@ describe("StorageCompareTools", () => {
 
       storageCompareTools.compareNormContractStorage(
         contractStorageLayoutD,
-        contractStorageLayoutDWithChangedTypeEncoding
+        contractStorageLayoutDWithChangedTypeEncoding,
       );
 
       const expectedTypeChangeData: TypeChangeData = {
@@ -387,7 +387,7 @@ describe("StorageCompareTools", () => {
       const buildInfoData = ParseBuildInfo(buildInfo);
 
       const contractStorageLayoutWithStruct = buildInfoData.contracts.find(
-        (contract) => contract.name === "WithStruct" && contract.source === "contracts/WithStruct.sol"
+        (contract) => contract.name === "WithStruct" && contract.source === "contracts/WithStruct.sol",
       )!!.entries;
 
       storageCompareTools.compareNormContractStorage(contractStorageLayoutWithStruct, contractStorageLayoutWithStruct);
@@ -401,20 +401,20 @@ describe("StorageCompareTools", () => {
       const buildInfo: BuildInfo = await this.hre.artifacts.getBuildInfo("contracts/WithStruct.sol:WithStruct");
       const buildInfoData = ParseBuildInfo(buildInfo);
       const contractStorageLayoutWithStruct = buildInfoData.contracts.find(
-        (contract) => contract.name === "WithStruct" && contract.source === "contracts/WithStruct.sol"
+        (contract) => contract.name === "WithStruct" && contract.source === "contracts/WithStruct.sol",
       )!!.entries;
 
       const buildInfoWithNewField: BuildInfo = await this.hre.artifacts.getBuildInfo(
-        "contracts/WithStructUpdated.sol:WithStructUpdated"
+        "contracts/WithStructUpdated.sol:WithStructUpdated",
       );
       const buildInfoDataWithNewField = ParseBuildInfo(buildInfoWithNewField);
       const contractStorageLayoutWithStructWithNewField = buildInfoDataWithNewField.contracts.find(
-        (contract) => contract.name === "WithStructUpdated" && contract.source === "contracts/WithStructUpdated.sol"
+        (contract) => contract.name === "WithStructUpdated" && contract.source === "contracts/WithStructUpdated.sol",
       )!!.entries;
 
       storageCompareTools.compareNormContractStorage(
         contractStorageLayoutWithStruct,
-        contractStorageLayoutWithStructWithNewField
+        contractStorageLayoutWithStructWithNewField,
       );
 
       assert.equal(storageCompareTools.result["contracts/WithStruct.sol:WithStruct"].size, 2);

@@ -42,7 +42,7 @@ describe("StorageLayout", () => {
 
       assert.isTrue(fs.existsSync(this.hre.config.compare.snapshotPath));
       assert.isTrue(
-        fs.existsSync(this.hre.config.compare.snapshotPath + "/" + this.hre.config.compare.snapshotFileName)
+        fs.existsSync(this.hre.config.compare.snapshotPath + "/" + this.hre.config.compare.snapshotFileName),
       );
     });
 
@@ -52,7 +52,7 @@ describe("StorageLayout", () => {
       await storageLayout.saveSnapshot(this.hre.config.compare.snapshotFileName);
 
       const snapshot = JSON.parse(
-        fs.readFileSync(this.hre.config.compare.snapshotPath + "/" + this.hre.config.compare.snapshotFileName, "utf8")
+        fs.readFileSync(this.hre.config.compare.snapshotPath + "/" + this.hre.config.compare.snapshotFileName, "utf8"),
       );
 
       assert.isObject(snapshot);
@@ -66,7 +66,7 @@ describe("StorageLayout", () => {
       const storageLayout = new StorageLayout(this.hre);
 
       await expect(
-        storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName, CompareModes.STRICT, true)
+        storageLayout.compareSnapshots(this.hre.config.compare.snapshotFileName, CompareModes.STRICT, true),
       ).to.be.rejectedWith(`Could not find directory for storage layout snapshots!`);
     });
 
@@ -76,7 +76,7 @@ describe("StorageLayout", () => {
       await storageLayout.saveSnapshot(this.hre.config.compare.snapshotFileName);
 
       expect(storageLayout.compareSnapshots("bla", CompareModes.STRICT, true)).to.be.rejectedWith(
-        `Could not find saved snapshot of the storage layout!`
+        `Could not find saved snapshot of the storage layout!`,
       );
     });
 

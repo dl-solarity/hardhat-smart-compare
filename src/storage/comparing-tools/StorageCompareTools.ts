@@ -182,7 +182,7 @@ export class StorageCompareTools {
   private isStorageEntriesEqual(
     contractName: string,
     oldStorageEntry: StorageEntry,
-    latestStorageEntry: StorageEntry
+    latestStorageEntry: StorageEntry,
   ): boolean {
     if (!this.isEntriesEqual(contractName, oldStorageEntry, latestStorageEntry)) {
       return false;
